@@ -53,3 +53,29 @@ var parallelepipedArray =
   parallelepiped_vertices[1], parallelepiped_vertices[6], parallelepiped_vertices[5]];
 var lenParallelepipedArray = 36;
 // **********************************************************************************
+var snakehead_vertices = [
+    vec4( 0.0 , 0.0 , 0.3 ),
+    vec4( 0.2 , 0.0 ,-0.1 ),
+    vec4( 0.0 , 0.2 ,-0.1 ),
+    vec4(-0.2 , 0.0 ,-0.1 ),
+    vec4(-0.18, 0.0 ,-0.3 ),
+    vec4(-0.11, 0.14,-0.3 ),
+    vec4( 0.11, 0.14,-0.3 ),
+    vec4( 0.18, 0.0 ,-0.3 )
+];
+// gl.TRIANGLES
+var snakeheadArray = 
+[ snakehead_vertices[0], snakehead_vertices[3], snakehead_vertices[2],
+  snakehead_vertices[0], snakehead_vertices[2], snakehead_vertices[1],
+  snakehead_vertices[0], snakehead_vertices[3], snakehead_vertices[1],
+  snakehead_vertices[1], snakehead_vertices[7], snakehead_vertices[4],
+  snakehead_vertices[4], snakehead_vertices[3], snakehead_vertices[1],
+  snakehead_vertices[4], snakehead_vertices[7], snakehead_vertices[5],
+  snakehead_vertices[5], snakehead_vertices[6], snakehead_vertices[7],
+  snakehead_vertices[5], snakehead_vertices[3], snakehead_vertices[4],
+  snakehead_vertices[3], snakehead_vertices[2], snakehead_vertices[5],
+  snakehead_vertices[2], snakehead_vertices[6], snakehead_vertices[5],
+  snakehead_vertices[2], snakehead_vertices[1], snakehead_vertices[6],
+  snakehead_vertices[1], snakehead_vertices[7], snakehead_vertices[6]];
+var lenSnakeheadArray = 36;
+// **********************************************************************************

@@ -85,3 +85,9 @@ function dump_matrix(mat) {
     }
     return ris;
 }
+
+function linear_interpolation(v1, min1, max1, min2, max2) {
+    var v2;
+    v2 = v1 * ((max2-min2) / (max1 - min1));
+    return v2;
+}

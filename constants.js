@@ -11,6 +11,7 @@ var PURPLE = vec4(0.5, 0.0, 0.5, 1.0);
 var PIRAMID = 0;
 var PARALLELEPIPED = 1;
 var AT = 2;
+var SNAKEHEAD = 3;
 
 var ROTATION_LEFT = 50;
 var ROTATION_RIGHT = 51;
