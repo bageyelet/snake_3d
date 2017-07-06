@@ -3,11 +3,12 @@ var gl; var canvas; var program;
 
 var square_size = 1.0;
 var tile_size_max = 0.25;
-var tile_size_min = 0.23;
+var tile_size_min = 0.22;
 
 var env_size_w = 23;
 var env_size_h = 29;
 var poss;
+var food; var theta_food = 0;
 
 var environment;
 var curr_position = [Math.ceil(env_size_w/2), Math.ceil(env_size_h/2)];
@@ -158,8 +159,19 @@ function renderObject(type, positions, theta) {
                                     false, flatten(modelViewMatrix));
                 gl.drawArrays(gl.TRIANGLES, 0, lenParallelepipedArray);
             }
+            break;
         default:
-            return -1;
+            throw "renderObject(): wrong type";
+    }
+}
+
+// food has two components: the first is the vector of coordinates, the second is the angle
+// at is a boolean!
+function renderEnvObjects(obstacles, food, at) {
+    renderObject(PIRAMID, obstacles, 0);
+    renderObject(PARALLELEPIPED, food[0], food[1]);
+    if (at) {
+        renderObject(AT, [curr_position], 0);
     }
 }
 
@@ -195,7 +207,6 @@ window.onload = function init() {
     projectionMatrix = perspective(fovy, aspect, near, far);
     cameraMatrix = lookAt(eye_pos, at_eye , up_eye);
 
-    renderEnv();
     poss = []; var k = 0;
     for (var i=0; i<env_size_w; i++) {
         poss[k] = [i, 0]; k+=1;
@@ -205,9 +216,13 @@ window.onload = function init() {
         poss[k] = [env_size_w-1, i]; k+=1;
     }
 
-    renderObject(PIRAMID, poss, 0);
-    renderObject(PARALLELEPIPED, [[10, 10], [11, 16]], 0);
-    renderObject(AT, [[curr_position]], 0);
+    food = [];
+    food.push([10, 10]);
+    food.push([11, 16]);
+
+    renderEnv();
+    renderEnvObjects(poss, [food, 0], true);
+
     bindButtons();
     render();
 }
@@ -239,7 +254,7 @@ function animation(type, curr) {
                         facing_direction = SOUTH;
                         break;
                     default:
-                        return -1;
+                        throw "animation(): facing_direction corrupted";
                 }
                 window.requestAnimationFrame(render);
             } else {
@@ -252,10 +267,8 @@ function animation(type, curr) {
                 cameraMatrix = lookAt(eye_pos, at_eye, up_eye);
 
                 renderEnv();
-                renderObject(PIRAMID, poss, 0);
-                theta = (theta + 2) % 360;
-                renderObject(PARALLELEPIPED, [[10, 10], [11, 18]], theta);
-                renderObject(AT, [curr_position], 0);
+                theta_food = (theta_food + 1) % 360;
+                renderEnvObjects(poss, [food, theta_food], true);
 
                 window.requestAnimationFrame(function() {
                     animation(ROTATION_LEFT, curr+2);
@@ -284,7 +297,7 @@ function animation(type, curr) {
                         facing_direction = NORTH;
                         break;
                     default:
-                        return -1;
+                        throw "animation(): facing_direction corrupted";
                 }
                 window.requestAnimationFrame(render);
             } else {
@@ -297,10 +310,8 @@ function animation(type, curr) {
                 cameraMatrix = lookAt(eye_pos, at_eye, up_eye);
 
                 renderEnv();
-                renderObject(PIRAMID, poss, 0);
-                theta = (theta + 1) % 360;
-                renderObject(PARALLELEPIPED, [[10, 10], [11, 18]], theta);
-                renderObject(AT, [curr_position], 0);
+                theta_food = (theta_food + 1) % 360;
+                renderEnvObjects(poss, [food, theta_food], true);
 
                 window.requestAnimationFrame(function() {
                     animation(ROTATION_RIGHT, curr+2);
@@ -328,7 +339,7 @@ function animation(type, curr) {
                             curr_position[1] -= 1;
                             break;
                         default:
-                            return -1;
+                            throw "animation(): facing_direction corrupted";
                     }
                 }
                 if (curr >= tile_size_max) {
@@ -347,10 +358,8 @@ function animation(type, curr) {
                     cameraMatrix = lookAt(eye_pos, at_eye, up_eye);
 
                     renderEnv();
-                    renderObject(PIRAMID, poss, 0);
-                    theta = (theta + 1) % 360;
-                    renderObject(PARALLELEPIPED, [[10, 10], [11, 18]], theta);
-                    renderObject(AT, [curr_position], 0);
+                    theta_food = (theta_food + 1) % 360;
+                    renderEnvObjects(poss, [food, theta_food], true);
 
                     window.requestAnimationFrame(function() {
                         animation(FORWARD, curr+0.01);
@@ -358,11 +367,10 @@ function animation(type, curr) {
                 }
             break;
         default:
-            return -1;
+            throw "animation(): wrong type";
     }
 }
 
-var theta = 0;
 function render() {
 
     if (leftKeyPressed) {
@@ -393,10 +401,8 @@ function render() {
 
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     renderEnv();
-    renderObject(PIRAMID, poss, 0);
-    theta = (theta + 1) % 360;
-    renderObject(PARALLELEPIPED, [[10, 10], [11, 18]], theta);
-    renderObject(AT, [curr_position], 0);
+    theta_food = (theta_food + 1) % 360;
+    renderEnvObjects(poss, [food, theta_food], true);
 
     window.requestAnimationFrame(render);
 }
