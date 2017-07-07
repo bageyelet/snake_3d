@@ -20,23 +20,17 @@ var eye_pos = vec3(at_eye[0], 1.0, at_eye[2]-2.0);
 var up_eye  = vec3(0.0, 1.0 , 0.0);
 
 var cameraMatrix; var projectionMatrix;
+var vBuffer; var vPosition;
+var buffer_indexes = {};
+var uColor;
+var uModelViewMatrix; var uProjectionMatrix; var uCameraMatrix;
 
 function renderTile(modelViewMatrix) {
-    gl.uniformMatrix4fv(gl.getUniformLocation( program, "modelViewMatrix"),
-                        false, flatten(modelViewMatrix));
-    gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
+    gl.uniformMatrix4fv(uModelViewMatrix, false, flatten(modelViewMatrix));
+    gl.drawArrays(gl.TRIANGLE_FAN, buffer_indexes[SQUARE], lenSquareArray);
 }
 
 function renderEnv() {
-
-    var pointsArray = squareArray;
-    var vBuffer = gl.createBuffer();
-    gl.bindBuffer( gl.ARRAY_BUFFER, vBuffer);
-    gl.bufferData( gl.ARRAY_BUFFER, flatten(pointsArray), gl.STATIC_DRAW );
-
-    var vPosition = gl.getAttribLocation( program, "vPosition" );
-    gl.vertexAttribPointer( vPosition, 4, gl.FLOAT, false, 0, 0 );
-    gl.enableVertexAttribArray( vPosition );
 
     gl.uniform4fv( gl.getUniformLocation(program, "color"), PURPLE);
 
@@ -54,99 +48,68 @@ function renderObject(type, positions, theta) {
     switch(type) {
         case PIRAMID:
 
-            var pointsArray = piramidArray;
-            var vBuffer = gl.createBuffer();
-            gl.bindBuffer( gl.ARRAY_BUFFER, vBuffer);
-            gl.bufferData( gl.ARRAY_BUFFER, flatten(pointsArray), gl.STATIC_DRAW );
-
-            var vPosition = gl.getAttribLocation( program, "vPosition" );
-            gl.vertexAttribPointer( vPosition, 4, gl.FLOAT, false, 0, 0 );
-            gl.enableVertexAttribArray( vPosition );
-
             gl.uniform4fv( gl.getUniformLocation(program, "color"), RED);
 
-            var scalematrix = scalem(0.11,0.16,0.11);
             for (var i=0; i<len; i++) {
                 var posX = positions[i][0]; var posY = positions[i][1];
                 var translateMatrix = translate(tile_size_min/2 + tile_size_max*posX , 0.01,tile_size_min/2 + tile_size_max*posY);
-                var modelViewMatrix = mult(translateMatrix, scalematrix);
-                gl.uniformMatrix4fv(gl.getUniformLocation( program, "modelViewMatrix"),
-                                    false, flatten(modelViewMatrix));
-                gl.drawArrays(gl.TRIANGLES, 0, lenPiramidArray);
+                var modelViewMatrix = mult(translateMatrix, piramid_scalematrix);
+                gl.uniformMatrix4fv(uModelViewMatrix, false, flatten(modelViewMatrix));
+                gl.drawArrays(gl.TRIANGLES, buffer_indexes[PIRAMID], lenPiramidArray);
             }
 
             break;
         case PARALLELEPIPED:
-
-            var pointsArray = parallelepipedArray;
-            var vBuffer = gl.createBuffer();
-            gl.bindBuffer( gl.ARRAY_BUFFER, vBuffer);
-            gl.bufferData( gl.ARRAY_BUFFER, flatten(pointsArray), gl.STATIC_DRAW );
-
-            var vPosition = gl.getAttribLocation( program, "vPosition" );
-            gl.vertexAttribPointer( vPosition, 4, gl.FLOAT, false, 0, 0 );
-            gl.enableVertexAttribArray( vPosition );
 
             gl.uniform4fv( gl.getUniformLocation(program, "color"), BLUE);
 
             for (var i = 0; i < len; i++) {
                 var posX = positions[i][0]; var posY = positions[i][1];
                 var rotationmatrix = rotate(theta, [0, 1, 0] );
-                var scalematrix = scalem(0.11,0.11,0.05);
                 var translateMatrix = translate(tile_size_min/2 + tile_size_max*posX, 0.01, tile_size_min/2 + tile_size_max*posY);
-                var modelViewMatrix = mult(translateMatrix, mult(rotationmatrix, scalematrix));
-                gl.uniformMatrix4fv(gl.getUniformLocation( program, "modelViewMatrix"),
-                                    false, flatten(modelViewMatrix));
-                gl.drawArrays(gl.TRIANGLES, 0, lenParallelepipedArray);
+                var modelViewMatrix = mult(translateMatrix, mult(rotationmatrix, parallelepiped_scalematrix));
+                gl.uniformMatrix4fv(uModelViewMatrix, false, flatten(modelViewMatrix));
+                gl.drawArrays(gl.TRIANGLES, buffer_indexes[PARALLELEPIPED], lenParallelepipedArray);
             }
             break;
         case SNAKEHEAD:
 
-            var pointsArray = snakeheadArray;
-            var vBuffer = gl.createBuffer();
-            gl.bindBuffer( gl.ARRAY_BUFFER, vBuffer);
-            gl.bufferData( gl.ARRAY_BUFFER, flatten(pointsArray), gl.STATIC_DRAW );
-
-            var vPosition = gl.getAttribLocation( program, "vPosition" );
-            gl.vertexAttribPointer( vPosition, 4, gl.FLOAT, false, 0, 0 );
-            gl.enableVertexAttribArray( vPosition );
-
             gl.uniform4fv( gl.getUniformLocation(program, "color"), GREEN);
 
             for (var i = 0; i < len; i++) {
                 var posX = positions[i][0]; var posY = positions[i][1];
                 var rotationmatrix = rotate(theta, [0, 1, 0] );
-                var scalematrix = scalem(0.4,0.5,0.3);
                 var translateMatrix = translate(tile_size_min/2 + tile_size_max*posX, 0.01, tile_size_min/2 + tile_size_max*posY);
-                var modelViewMatrix = mult(translateMatrix, mult(rotationmatrix, scalematrix));
-                gl.uniformMatrix4fv(gl.getUniformLocation( program, "modelViewMatrix"),
-                                    false, flatten(modelViewMatrix));
-                gl.drawArrays(gl.TRIANGLES, 0, lenSnakeheadArray);
+                var modelViewMatrix = mult(translateMatrix, mult(rotationmatrix, snakehead_scalematrix));
+                gl.uniformMatrix4fv(uModelViewMatrix, false, flatten(modelViewMatrix));
+                gl.drawArrays(gl.TRIANGLES, buffer_indexes[SNAKEHEAD], lenSnakeheadArray);
             }
             break;
-        case AT:
-
-            var pointsArray = parallelepipedArray;
-            var vBuffer = gl.createBuffer();
-            gl.bindBuffer( gl.ARRAY_BUFFER, vBuffer);
-            gl.bufferData( gl.ARRAY_BUFFER, flatten(pointsArray), gl.STATIC_DRAW );
-
-            var vPosition = gl.getAttribLocation( program, "vPosition" );
-            gl.vertexAttribPointer( vPosition, 4, gl.FLOAT, false, 0, 0 );
-            gl.enableVertexAttribArray( vPosition );
+        case SNAKEBODY:
 
             gl.uniform4fv( gl.getUniformLocation(program, "color"), GREEN);
 
             for (var i = 0; i < len; i++) {
                 var posX = positions[i][0]; var posY = positions[i][1];
                 var rotationmatrix = rotate(theta, [0, 1, 0] );
-                var scalematrix = scalem(0.05,0.20,0.05);
-
                 var translateMatrix = translate(tile_size_min/2 + tile_size_max*posX, 0.01, tile_size_min/2 + tile_size_max*posY);
-                var modelViewMatrix = mult(translateMatrix, mult(rotationmatrix, scalematrix));
-                gl.uniformMatrix4fv(gl.getUniformLocation( program, "modelViewMatrix"),
-                                    false, flatten(modelViewMatrix));
-                gl.drawArrays(gl.TRIANGLES, 0, lenParallelepipedArray);
+                var modelViewMatrix = mult(translateMatrix, mult(rotationmatrix, snakebody_scalematrix));
+                gl.uniformMatrix4fv(uModelViewMatrix, false, flatten(modelViewMatrix));
+                gl.drawArrays(gl.TRIANGLES, buffer_indexes[SNAKEBODY], lenSnakebodyArray);
+            }
+            break;
+
+        case SNAKETAIL:
+
+            gl.uniform4fv( gl.getUniformLocation(program, "color"), GREEN);
+
+            for (var i = 0; i < len; i++) {
+                var posX = positions[i][0]; var posY = positions[i][1];
+                var rotationmatrix = rotate(theta, [0, 1, 0] );
+                var translateMatrix = translate(tile_size_min/2 + tile_size_max*posX, 0.01, tile_size_min/2 + tile_size_max*posY);
+                var modelViewMatrix = mult(translateMatrix, mult(rotationmatrix, snaketail_scalematrix));
+                gl.uniformMatrix4fv(uModelViewMatrix, false, flatten(modelViewMatrix));
+                gl.drawArrays(gl.TRIANGLES, buffer_indexes[SNAKETAIL], lenSnaketailArray);
             }
             break;
         default:
@@ -161,9 +124,10 @@ function renderEnvObjects(obstacles, food, snake) {
     renderObject(PIRAMID, obstacles, 0);
     renderObject(PARALLELEPIPED, food[0], food[1]);
     renderObject(SNAKEHEAD, [snake[0]], snake[1]);
+    renderObject(SNAKEBODY, [[snake[0][0], snake[0][1] -1 ], [snake[0][0], snake[0][1] -2 ]], 0);
+    renderObject(SNAKETAIL, [[snake[0][0], snake[0][1] -3 ]], 0);
 }
 
-var isViewChanged = false; var topView = false;
 var leftKeyPressed = false; var rightKeyPressed = false; var upKeyPressed = false;
 function bindButtons() {
     // document.getElementById("switchView").onclick = function(){isViewChanged = true; topView = !topView;};
@@ -189,7 +153,7 @@ window.onload = function init() {
     if ( !gl ) { alert( "WebGL isn't available" ); }
     gl.viewport( 0, 0, canvas.width, canvas.height );
     gl.clearColor( 0, 0, 0, 1 );
-    gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
 
     var near = 0.3; var far = 50.0; var  fovy = 45.0; var  aspect = canvas.width/canvas.height;
     projectionMatrix = perspective(fovy, aspect, near, far);
@@ -198,11 +162,27 @@ window.onload = function init() {
     program = initShaders( gl, "vs-env", "fs-env");
     gl.useProgram( program );
 
-    gl.uniformMatrix4fv( gl.getUniformLocation(program, "projectionMatrix"),
-        false, flatten(projectionMatrix));
+    uModelViewMatrix = gl.getUniformLocation( program, "modelViewMatrix");
+    uProjectionMatrix = gl.getUniformLocation(program, "projectionMatrix");
+    uCameraMatrix = gl.getUniformLocation(program, "cameraMatrix");
 
-    gl.uniformMatrix4fv( gl.getUniformLocation(program, "cameraMatrix"),
-        false, flatten(cameraMatrix));
+    gl.uniformMatrix4fv( uProjectionMatrix, false, flatten(projectionMatrix));
+
+    gl.uniformMatrix4fv( uCameraMatrix, false, flatten(cameraMatrix));
+
+    // initialize buffer with ALL vertices
+    var allVertices = squareArray.concat(piramidArray).concat(parallelepipedArray).concat(snakeheadArray)
+                      .concat(snakebodyArray).concat(snaketailArray);
+
+    vBuffer = gl.createBuffer();
+    gl.bindBuffer( gl.ARRAY_BUFFER, vBuffer);
+    gl.bufferData( gl.ARRAY_BUFFER, flatten(allVertices), gl.STATIC_DRAW );
+    buffer_indexes[SQUARE] = 0; buffer_indexes[PIRAMID] = 4; buffer_indexes[PARALLELEPIPED] = 22; 
+    buffer_indexes[SNAKEHEAD] = 58; buffer_indexes[SNAKEBODY] = 94; buffer_indexes[SNAKETAIL] = 130;
+
+    vPosition = gl.getAttribLocation( program, "vPosition" );
+    gl.vertexAttribPointer( vPosition, 4, gl.FLOAT, false, 0, 0 );
+    gl.enableVertexAttribArray( vPosition );
 
     poss = []; var k = 0;
     for (var i=0; i<env_size_w; i++) {
@@ -262,8 +242,7 @@ function animation(type, curr) {
                 eye_pos4 = apply_matrix4(rotationmatrix_left, eye_pos4);
                 eye_pos = vec3(eye_pos4);
                 cameraMatrix = lookAt(eye_pos, at_eye, up_eye);
-                gl.uniformMatrix4fv( gl.getUniformLocation(program, "cameraMatrix"),
-                    false, flatten(cameraMatrix));
+                gl.uniformMatrix4fv( uCameraMatrix, false, flatten(cameraMatrix));
 
                 renderEnv();
                 theta_food = (theta_food + 1) % 360;
@@ -309,8 +288,7 @@ function animation(type, curr) {
                 eye_pos4 = apply_matrix4(rotationmatrix_right, eye_pos4);
                 eye_pos = vec3(eye_pos4);
                 cameraMatrix = lookAt(eye_pos, at_eye, up_eye);
-                gl.uniformMatrix4fv( gl.getUniformLocation(program, "cameraMatrix"),
-                    false, flatten(cameraMatrix));
+                gl.uniformMatrix4fv( uCameraMatrix, false, flatten(cameraMatrix));
 
                 renderEnv();
                 theta_food = (theta_food + 1) % 360;
@@ -369,8 +347,7 @@ function animation(type, curr) {
                     at_eye4 = apply_matrix4(forward_matrix, at_eye4);
                     at_eye = vec3(at_eye4);
                     cameraMatrix = lookAt(eye_pos, at_eye, up_eye);
-                    gl.uniformMatrix4fv( gl.getUniformLocation(program, "cameraMatrix"),
-                        false, flatten(cameraMatrix));
+                    gl.uniformMatrix4fv( uCameraMatrix, false, flatten(cameraMatrix));
 
                     renderEnv();
                     theta_food = (theta_food + 1) % 360;

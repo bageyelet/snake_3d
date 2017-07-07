@@ -1,38 +1,74 @@
-function mult_mat_vec(mat, vec) {
-    if (!mat.matrix) 
-        throw "mult_mat_vec(): the first argument is not a matrix";
-    if (mat[0].length != vec.length)
-        throw "mult_mat_vec(): wrong dimensions";
-
-    var ris = Array.apply(null, Array(mat.length)).map(Number.prototype.valueOf,0);
-
-    for ( var i = 0; i < mat.length; ++i ) {
-        for ( var j = 0; j < mat[0].length; ++j ) {
-            ris[i] += mat[i][j] * vec[j];
-        }
-    }
-
-    return ris;
+function _argumentsToArray( args )
+{
+    return [].concat.apply( [], Array.prototype.slice.apply(args) );
 }
 
-var m = [[1,2,3], [4,5,6], [7,8,9]];
-m.matrix = true;
+function vec4()
+{
+    var result = _argumentsToArray( arguments );
 
-var v = [1,2,3];
-
-console.log(mult_mat_vec(m, v));
-
-function dump_matrix(mat) {
-	ris = "";
-    for ( var i = 0; i < mat.length; ++i ) {
-        for ( var j = 0; j < mat[0].length; ++j ) {
-            if (j < mat[0].length - 1)
-                ris += mat[i][j].toString() + ", ";
-            else ris += mat[i][j].toString();
-        }
-        ris += "\n";
+    switch ( result.length ) {
+    case 0: result.push( 0.0 );
+    case 1: result.push( 0.0 );
+    case 2: result.push( 0.0 );
+    case 3: result.push( 1.0 );
     }
-	return ris;
+
+    return result.splice( 0, 4 );
 }
 
-console.log(dump_matrix(m));
+var square_vertices = [
+    vec4( -0.5, 0.0,  0.5, 1.0 ),
+    vec4( -0.5, 0.0, -0.5, 1.0 ),
+    vec4(  0.5, 0.0, -0.5, 1.0 ),
+    vec4(  0.5, 0.0,  0.5, 1.0 )
+];
+//gl.TRIANGLE_FAN
+var squareArray = square_vertices;
+var lenSquareArray = 4;
+// **********************************************************************************
+var piramid_vertices = [
+    vec4(  1.0,  0.0,  1.0, 1.0 ),
+    vec4(  1.0,  0.0, -1.0, 1.0 ),
+    vec4( -1.0,  0.0, -1.0, 1.0 ),
+    vec4( -1.0,  0.0,  1.0, 1.0 ),
+    vec4(  0.0,  1.0,  0.0, 1.0 )
+];
+// gl.TRIANGLES
+var piramidArray =
+[piramid_vertices[0], piramid_vertices[1], piramid_vertices[2],
+ piramid_vertices[0], piramid_vertices[2], piramid_vertices[3],
+ piramid_vertices[0], piramid_vertices[1], piramid_vertices[4],
+ piramid_vertices[0], piramid_vertices[3], piramid_vertices[4],
+ piramid_vertices[3], piramid_vertices[2], piramid_vertices[4],
+ piramid_vertices[2], piramid_vertices[1], piramid_vertices[4]];
+var lenPiramidArray = 18;
+var parallelepiped_vertices = [
+    vec4( -0.5, 0.0,  0.5, 1.0 ),
+    vec4( -0.5, 0.0, -0.5, 1.0 ),
+    vec4(  0.5, 0.0, -0.5, 1.0 ),
+    vec4(  0.5, 0.0,  0.5, 1.0 ),
+    vec4( -0.5, 1.0,  0.5, 1.0 ),
+    vec4( -0.5, 1.0, -0.5, 1.0 ),
+    vec4(  0.5, 1.0, -0.5, 1.0 ),
+    vec4(  0.5, 1.0,  0.5, 1.0 )
+];
+// gl.TRIANGLES
+var parallelepipedArray =
+[ parallelepiped_vertices[0], parallelepiped_vertices[1], parallelepiped_vertices[3],
+  parallelepiped_vertices[2], parallelepiped_vertices[1], parallelepiped_vertices[3],
+  parallelepiped_vertices[0], parallelepiped_vertices[4], parallelepiped_vertices[3],
+  parallelepiped_vertices[3], parallelepiped_vertices[4], parallelepiped_vertices[7],
+  parallelepiped_vertices[3], parallelepiped_vertices[7], parallelepiped_vertices[2],
+  parallelepiped_vertices[7], parallelepiped_vertices[2], parallelepiped_vertices[6],
+  parallelepiped_vertices[7], parallelepiped_vertices[4], parallelepiped_vertices[5],
+  parallelepiped_vertices[7], parallelepiped_vertices[5], parallelepiped_vertices[6],
+  parallelepiped_vertices[0], parallelepiped_vertices[1], parallelepiped_vertices[5],
+  parallelepiped_vertices[0], parallelepiped_vertices[4], parallelepiped_vertices[5],
+  parallelepiped_vertices[1], parallelepiped_vertices[2], parallelepiped_vertices[6],
+  parallelepiped_vertices[1], parallelepiped_vertices[6], parallelepiped_vertices[5]];
+var lenParallelepipedArray = 36;
+
+var allVertices = squareArray.concat(piramidArray)
+            .concat(parallelepipedArray);
+console.log(allVertices);
