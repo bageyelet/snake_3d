@@ -1,74 +1,23 @@
-function _argumentsToArray( args )
-{
-    return [].concat.apply( [], Array.prototype.slice.apply(args) );
-}
+var PIRAMID = 1;
+var PARALLELEPIPED = 2;
+var VOID = 3;
 
-function vec4()
-{
-    var result = _argumentsToArray( arguments );
-
-    switch ( result.length ) {
-    case 0: result.push( 0.0 );
-    case 1: result.push( 0.0 );
-    case 2: result.push( 0.0 );
-    case 3: result.push( 1.0 );
+function build_env(env_w, env_h) {
+    var ris = [];
+    for (var i=0; i<env_w; i++) {
+        ris.push([]);
+        for (var j=0; j<env_h; j++) {
+            if (i==0 || j==0 || i==env_w-1 || j==env_h-1)
+                ris[i][j] = PIRAMID;
+            else if ((i==3 && j==3) || (i==10 && j==12))
+                ris[i][j] = PARALLELEPIPED;
+            else
+                ris[i][j] = VOID;
+        }
     }
-
-    return result.splice( 0, 4 );
+    return ris;
 }
 
-var square_vertices = [
-    vec4( -0.5, 0.0,  0.5, 1.0 ),
-    vec4( -0.5, 0.0, -0.5, 1.0 ),
-    vec4(  0.5, 0.0, -0.5, 1.0 ),
-    vec4(  0.5, 0.0,  0.5, 1.0 )
-];
-//gl.TRIANGLE_FAN
-var squareArray = square_vertices;
-var lenSquareArray = 4;
-// **********************************************************************************
-var piramid_vertices = [
-    vec4(  1.0,  0.0,  1.0, 1.0 ),
-    vec4(  1.0,  0.0, -1.0, 1.0 ),
-    vec4( -1.0,  0.0, -1.0, 1.0 ),
-    vec4( -1.0,  0.0,  1.0, 1.0 ),
-    vec4(  0.0,  1.0,  0.0, 1.0 )
-];
-// gl.TRIANGLES
-var piramidArray =
-[piramid_vertices[0], piramid_vertices[1], piramid_vertices[2],
- piramid_vertices[0], piramid_vertices[2], piramid_vertices[3],
- piramid_vertices[0], piramid_vertices[1], piramid_vertices[4],
- piramid_vertices[0], piramid_vertices[3], piramid_vertices[4],
- piramid_vertices[3], piramid_vertices[2], piramid_vertices[4],
- piramid_vertices[2], piramid_vertices[1], piramid_vertices[4]];
-var lenPiramidArray = 18;
-var parallelepiped_vertices = [
-    vec4( -0.5, 0.0,  0.5, 1.0 ),
-    vec4( -0.5, 0.0, -0.5, 1.0 ),
-    vec4(  0.5, 0.0, -0.5, 1.0 ),
-    vec4(  0.5, 0.0,  0.5, 1.0 ),
-    vec4( -0.5, 1.0,  0.5, 1.0 ),
-    vec4( -0.5, 1.0, -0.5, 1.0 ),
-    vec4(  0.5, 1.0, -0.5, 1.0 ),
-    vec4(  0.5, 1.0,  0.5, 1.0 )
-];
-// gl.TRIANGLES
-var parallelepipedArray =
-[ parallelepiped_vertices[0], parallelepiped_vertices[1], parallelepiped_vertices[3],
-  parallelepiped_vertices[2], parallelepiped_vertices[1], parallelepiped_vertices[3],
-  parallelepiped_vertices[0], parallelepiped_vertices[4], parallelepiped_vertices[3],
-  parallelepiped_vertices[3], parallelepiped_vertices[4], parallelepiped_vertices[7],
-  parallelepiped_vertices[3], parallelepiped_vertices[7], parallelepiped_vertices[2],
-  parallelepiped_vertices[7], parallelepiped_vertices[2], parallelepiped_vertices[6],
-  parallelepiped_vertices[7], parallelepiped_vertices[4], parallelepiped_vertices[5],
-  parallelepiped_vertices[7], parallelepiped_vertices[5], parallelepiped_vertices[6],
-  parallelepiped_vertices[0], parallelepiped_vertices[1], parallelepiped_vertices[5],
-  parallelepiped_vertices[0], parallelepiped_vertices[4], parallelepiped_vertices[5],
-  parallelepiped_vertices[1], parallelepiped_vertices[2], parallelepiped_vertices[6],
-  parallelepiped_vertices[1], parallelepiped_vertices[6], parallelepiped_vertices[5]];
-var lenParallelepipedArray = 36;
+var env = build_env(20, 20);
 
-var allVertices = squareArray.concat(piramidArray)
-            .concat(parallelepipedArray);
-console.log(allVertices);
+console.log(env);

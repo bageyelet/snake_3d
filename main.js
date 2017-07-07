@@ -1,5 +1,6 @@
 "use strict";
 var gl; var canvas; var program;
+var stats;
 
 var square_size = 1.0;
 var tile_size_max = 0.25;
@@ -149,9 +150,16 @@ window.onload = function init() {
     canvas.height = window.innerHeight-250;
     canvas.style.display = "block";
 
+    stats = new Stats();
+    stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
+    stats.domElement.style.position = 'absolute';
+    stats.domElement.style.left = '8px';
+    stats.domElement.style.top = '8px';
+
     gl = WebGLUtils.setupWebGL( canvas );
     if ( !gl ) { alert( "WebGL isn't available" ); }
     gl.viewport( 0, 0, canvas.width, canvas.height );
+    gl.enable(gl.DEPTH_TEST);
     gl.clearColor( 0, 0, 0, 1 );
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
 

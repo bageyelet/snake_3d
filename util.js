@@ -91,3 +91,19 @@ function linear_interpolation(v1, min1, max1, min2, max2) {
     v2 = v1 * ((max2-min2) / (max1 - min1));
     return v2;
 }
+
+function build_env(env_w, env_h) {
+    var ris = [];
+    for (var i=0; i<env_w; i++) {
+        ris.push([]);
+        for (var j=0; j<env_h; j++) {
+            if (i==0 || j==0 || i==env_w-1 || j==env_h-1)
+                ris[i][j] = PIRAMID;
+            else if ((i==3 && j==3) || (i==10 && j==12))
+                ris[i][j] = PARALLELEPIPED;
+            else
+                ris[i][j] = VOID;
+        }
+    }
+    return ris;
+}

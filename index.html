@@ -27,12 +27,14 @@ void main()
 </script>
 
 
+<script type="text/javascript" src="./Common/stats.min.js"></script>
+
 <script type="text/javascript" src="./Common/webgl-utils.js"></script>
 <script type="text/javascript" src="./Common/initShaders.js"></script>
 <script type="text/javascript" src="./Common/MV.js"></script>
+<script type="text/javascript" src="constants.js"></script>
 <script type="text/javascript" src="geometries.js"></script>
 <script type="text/javascript" src="util.js"></script>
-<script type="text/javascript" src="constants.js"></script>
 <script type="text/javascript" src="main.js"></script>
 
 <body>
@@ -40,5 +42,19 @@ void main()
 Oops ... your browser doesn't support the HTML5 canvas element
 </canvas>
 <!-- <button id = "switchView">Switch View</button> -->
+<script type="text/javascript">
+    var stats = new Stats();
+    stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
+    stats.domElement.style.position = 'absolute';
+    stats.domElement.style.left = '8px';
+    stats.domElement.style.top = '8px';
+    document.body.appendChild( stats.dom );
+    function animate() {
+        stats.begin();
+        stats.end();
+        requestAnimationFrame( animate );
+    }
+    requestAnimationFrame( animate );
+</script>
 </body>
 </html>
