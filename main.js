@@ -13,11 +13,12 @@ var food; var theta_food = 0;
 
 var environment;
 var curr_position = [Math.ceil(env_size_w/2), Math.ceil(env_size_h/2)];
+var snake;
 var facing_direction = NORTH;
 var angle_head = 0;
 
 var at_eye  = vec3(curr_position[0]*tile_size_max + tile_size_min/2, 0.0 , curr_position[1]*tile_size_max + tile_size_min/2);
-var eye_pos = vec3(at_eye[0], 1.0, at_eye[2]-2.0);
+var eye_pos = vec3(at_eye[0], 1.25, at_eye[2]-2.0);
 var up_eye  = vec3(0.0, 1.0 , 0.0);
 
 var cameraMatrix; var projectionMatrix;
@@ -25,6 +26,35 @@ var vBuffer; var vPosition;
 var buffer_indexes = {};
 var uColor;
 var uModelViewMatrix; var uProjectionMatrix; var uCameraMatrix;
+
+function setCamera(eye, at, update_global) {
+    // eye.delta_transl; eye.delta_angle;
+    // at.delta_transl; at.delta_angle; <-- not implemented!
+
+    var old_eye_pos = eye_pos.slice();
+    var old_at_eye = at_eye.slice();
+    old_eye_pos.push(1.0);
+    old_at_eye.push(1.0);
+
+    var mat_eye  = translate(-old_at_eye[0], 0.0, -old_at_eye[2]);
+    mat_eye = mult(rotate( eye.delta_angle , [0, 1, 0] ), mat_eye);
+    mat_eye = mult(translate(old_at_eye[0], 0.0, old_at_eye[2]), mat_eye);
+    mat_eye = mult(translate( eye.delta_transl[0] , eye.delta_transl[1], eye.delta_transl[2]), mat_eye);
+
+    var mat_at  = translate( at.delta_transl[0] , at.delta_transl[1], at.delta_transl[2]);
+
+    old_eye_pos = vec3(apply_matrix4(mat_eye, old_eye_pos));
+    old_at_eye = vec3(apply_matrix4(mat_at, old_at_eye));
+
+    cameraMatrix = lookAt(old_eye_pos, old_at_eye, up_eye);
+    gl.uniformMatrix4fv( uCameraMatrix, false, flatten(cameraMatrix));
+
+    if (update_global) {
+        eye_pos = vec3(old_eye_pos);
+        at_eye = vec3(old_at_eye);
+    }
+
+}
 
 function renderTile(modelViewMatrix) {
     gl.uniformMatrix4fv(uModelViewMatrix, false, flatten(modelViewMatrix));
@@ -125,8 +155,8 @@ function renderEnvObjects(obstacles, food, snake) {
     renderObject(PIRAMID, obstacles, 0);
     renderObject(PARALLELEPIPED, food[0], food[1]);
     renderObject(SNAKEHEAD, [snake[0]], snake[1]);
-    renderObject(SNAKEBODY, [[snake[0][0], snake[0][1] -1 ], [snake[0][0], snake[0][1] -2 ]], 0);
-    renderObject(SNAKETAIL, [[snake[0][0], snake[0][1] -3 ]], 0);
+    // renderObject(SNAKEBODY, [[snake[0][0], snake[0][1] -1 ], [snake[0][0], snake[0][1] -2 ]], 0);
+    // renderObject(SNAKETAIL, [[snake[0][0], snake[0][1] -3 ]], 0);
 }
 
 var leftKeyPressed = false; var rightKeyPressed = false; var upKeyPressed = false;
@@ -155,6 +185,7 @@ window.onload = function init() {
     stats.domElement.style.position = 'absolute';
     stats.domElement.style.left = '8px';
     stats.domElement.style.top = '8px';
+    document.body.appendChild( stats.dom );
 
     gl = WebGLUtils.setupWebGL( canvas );
     if ( !gl ) { alert( "WebGL isn't available" ); }
@@ -216,159 +247,329 @@ var rotationmatrix_left;
 var rotationmatrix_right;
 var forward_matrix; var xSnake; var ySnake;
 
+var inc_tran={x:0, y:0};
+var tot_tran={x:0, y:0};
+var inc_rot=0;
+var tot_rot=0;
+
+var inc_pos={x:0, y:0};
+var tot_pos={x:0, y:0};
+var old_pos;
+
+var max_curr=200; var speed=4;
+
 function animation(type, curr) {
     switch(type) {
         case ROTATION_LEFT:
             if (curr == 0) {
-                rotationmatrix_left  = translate(-at_eye[0], 0.0, -at_eye[2]);
-                rotationmatrix_left = mult(rotate( 2, [0, 1, 0] ), rotationmatrix_left);
-                rotationmatrix_left = mult(translate(at_eye[0], 0.0, at_eye[2]), rotationmatrix_left);
-            }
-            if (curr >= 90) {
+                old_pos = curr_position.slice();
                 switch (facing_direction) {
                     case NORTH:
                         facing_direction = WEST;
+                        curr_position[0] += 1;
+                        inc_pos.x = linear_interpolation(speed, 0, max_curr, 0, 1);
+                        inc_pos.y = 0;
+                        inc_tran.x = linear_interpolation(speed, 0, max_curr, 0, tile_size_max);
+                        inc_tran.y = 0;
                         break;
                     case SOUTH:
                         facing_direction = EAST;
+                        curr_position[0] -= 1;
+                        inc_pos.x = -linear_interpolation(speed, 0, max_curr, 0, 1);
+                        inc_pos.y = 0;
+                        inc_tran.x = -linear_interpolation(speed, 0, max_curr, 0, tile_size_max);
+                        inc_tran.y = 0;
                         break;
                     case EAST:
                         facing_direction = NORTH;
+                        curr_position[1] += 1;
+                        inc_pos.x = 0;
+                        inc_pos.y = linear_interpolation(speed, 0, max_curr, 0, 1);
+                        inc_tran.x = 0;
+                        inc_tran.y = linear_interpolation(speed, 0, max_curr, 0, tile_size_max);
                         break;
                     case WEST:
                         facing_direction = SOUTH;
+                        curr_position[1] -= 1;
+                        inc_pos.x = 0;
+                        inc_pos.y = -linear_interpolation(speed, 0, max_curr, 0, 1);
+                        inc_tran.x = 0;
+                        inc_tran.y = -linear_interpolation(speed, 0, max_curr, 0, tile_size_max);
                         break;
                     default:
                         throw "animation(): facing_direction corrupted";
                 }
-                window.requestAnimationFrame(render);
-            } else {
+
+                inc_rot = linear_interpolation(speed, 0, max_curr, 0, 90);
+                tot_pos.x=0; tot_pos.y=0; tot_tran.x=0; tot_tran.y=0; tot_rot=0;
+
+            }
+            if (curr >= max_curr) {
                 gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-                var eye_pos4 = eye_pos.slice();
-                eye_pos4.push(1.0);
-                eye_pos4 = apply_matrix4(rotationmatrix_left, eye_pos4);
-                eye_pos = vec3(eye_pos4);
-                cameraMatrix = lookAt(eye_pos, at_eye, up_eye);
-                gl.uniformMatrix4fv( uCameraMatrix, false, flatten(cameraMatrix));
+                angle_head = fix_round_error(angle_head, 90)%360;
+
+                var eye={};
+                eye.delta_transl = [NaN, 0.0, NaN];
+                eye.delta_angle = 90;
+
+                var at={};
+                at.delta_transl = [];
+
+                if (inc_tran.y == 0) {
+                    eye.delta_transl[2] = 0.0;
+                    if (inc_tran.x>0) {
+                        eye.delta_transl[0] = tile_size_max;
+                    } else {
+                        eye.delta_transl[0] = -tile_size_max;
+                    }
+                } else if (inc_tran.x == 0) {
+                    eye.delta_transl[0] = 0.0;
+                    if (inc_tran.y>0) {
+                        eye.delta_transl[2] = tile_size_max;
+                    } else {
+                        eye.delta_transl[2] = -tile_size_max;
+                    }
+                } else {
+                    throw "animation(): inconsistent inc_tran state"
+                }
+                at.delta_transl = eye.delta_transl;
+                setCamera(eye, at, true);
 
                 renderEnv();
                 theta_food = (theta_food + 1) % 360;
                 renderEnvObjects(poss, [food, theta_food], [curr_position, angle_head]);
 
-                angle_head += 2;
+                window.requestAnimationFrame(render);
+            } else {
+                gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+                var eye={};
+                eye.delta_transl = [tot_tran.x, 0.0, tot_tran.y];
+                eye.delta_angle = tot_rot;
+
+                var at={};
+                at.delta_transl = eye.delta_transl;
+
+                setCamera(eye, at, false);
+                renderEnv();
+                theta_food = (theta_food + 1) % 360;
+                renderEnvObjects(poss, [food, theta_food], [[old_pos[0]+tot_pos.x, old_pos[1]+tot_pos.y], angle_head]);
+
+                angle_head += inc_rot;
+                tot_rot    += inc_rot;
+
+                tot_tran.x += inc_tran.x;
+                tot_tran.y += inc_tran.y;
+                tot_pos.x  += inc_pos.x;
+                tot_pos.y  += inc_pos.y;
 
                 window.requestAnimationFrame(function() {
-                    animation(ROTATION_LEFT, curr+2);
+                    animation(ROTATION_LEFT, curr+speed);
                 });
                 
             }
             break;
         case ROTATION_RIGHT:
             if (curr == 0) {
-                rotationmatrix_right  = translate(-at_eye[0], 0.0, -at_eye[2]);
-                rotationmatrix_right = mult(rotate(-2, [0, 1, 0] ), rotationmatrix_right);
-                rotationmatrix_right = mult(translate(at_eye[0], 0.0, at_eye[2]), rotationmatrix_right);
-            }
-            if (curr >= 90) {
+                old_pos = curr_position.slice();
                 switch (facing_direction) {
                     case NORTH:
                         facing_direction = EAST;
+                        curr_position[0] -= 1;
+                        inc_pos.x = -linear_interpolation(speed, 0, max_curr, 0, 1);
+                        inc_pos.y = 0;
+                        inc_tran.x = -linear_interpolation(speed, 0, max_curr, 0, tile_size_max);
+                        inc_tran.y = 0;
                         break;
                     case SOUTH:
                         facing_direction = WEST;
+                        curr_position[0] += 1;
+                        inc_pos.x = linear_interpolation(speed, 0, max_curr, 0, 1);
+                        inc_pos.y = 0;
+                        inc_tran.x = linear_interpolation(speed, 0, max_curr, 0, tile_size_max);
+                        inc_tran.y = 0;
                         break;
                     case EAST:
                         facing_direction = SOUTH;
+                        curr_position[1] -= 1;
+                        inc_pos.x = 0;
+                        inc_pos.y = -linear_interpolation(speed, 0, max_curr, 0, 1);
+                        inc_tran.x = 0;
+                        inc_tran.y = -linear_interpolation(speed, 0, max_curr, 0, tile_size_max);
                         break;
                     case WEST:
                         facing_direction = NORTH;
+                        curr_position[1] += 1;
+                        inc_pos.x = 0;
+                        inc_pos.y = linear_interpolation(speed, 0, max_curr, 0, 1);
+                        inc_tran.x = 0;
+                        inc_tran.y = linear_interpolation(speed, 0, max_curr, 0, tile_size_max);
                         break;
                     default:
                         throw "animation(): facing_direction corrupted";
                 }
-                window.requestAnimationFrame(render);
-            } else {
+
+                inc_rot = -linear_interpolation(speed, 0, max_curr, 0, 90);
+                tot_pos.x=0; tot_pos.y=0; tot_tran.x=0; tot_tran.y=0; tot_rot=0;
+
+            } 
+            if (curr >= max_curr) {
                 gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-                var eye_pos4 = eye_pos.slice();
-                eye_pos4.push(1.0);
-                eye_pos4 = apply_matrix4(rotationmatrix_right, eye_pos4);
-                eye_pos = vec3(eye_pos4);
-                cameraMatrix = lookAt(eye_pos, at_eye, up_eye);
-                gl.uniformMatrix4fv( uCameraMatrix, false, flatten(cameraMatrix));
+                angle_head = fix_round_error(angle_head, 90)%360;
 
+                var eye={};
+                eye.delta_transl = [NaN, 0.0, NaN];
+                eye.delta_angle = -90;
+
+                var at={};
+
+                if (inc_tran.y == 0) {
+                    eye.delta_transl[2] = 0.0;
+                    if (inc_tran.x>0) {
+                        eye.delta_transl[0] = tile_size_max;
+                    } else {
+                        eye.delta_transl[0] = -tile_size_max;
+                    }
+                } else if (inc_tran.x == 0) {
+                    eye.delta_transl[0] = 0.0;
+                    if (inc_tran.y>0) {
+                        eye.delta_transl[2] = tile_size_max;
+                    } else {
+                        eye.delta_transl[2] = -tile_size_max;
+                    }
+                } else {
+                    throw "animation(): inconsistent inc_tran state"
+                }
+                at.delta_transl = eye.delta_transl;
+
+                setCamera(eye, at, true);
                 renderEnv();
                 theta_food = (theta_food + 1) % 360;
                 renderEnvObjects(poss, [food, theta_food], [curr_position, angle_head]);
 
-                angle_head -= 2;
+                window.requestAnimationFrame(render);
+            } else {
+                gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+                var eye={};
+                eye.delta_transl = [tot_tran.x, 0.0, tot_tran.y];
+                eye.delta_angle = tot_rot;
+
+                var at={};
+                at.delta_transl = eye.delta_transl;
+
+                setCamera(eye, at, false);
+                renderEnv();
+                theta_food = (theta_food + 1) % 360;
+                renderEnvObjects(poss, [food, theta_food], [[old_pos[0]+tot_pos.x, old_pos[1]+tot_pos.y], angle_head]);
+
+                angle_head += inc_rot;
+                tot_rot    += inc_rot;
+
+                tot_tran.x += inc_tran.x;
+                tot_tran.y += inc_tran.y;
+                tot_pos.x  += inc_pos.x;
+                tot_pos.y  += inc_pos.y;
 
                 window.requestAnimationFrame(function() {
-                    animation(ROTATION_RIGHT, curr+2);
+                    animation(ROTATION_RIGHT, curr+speed);
                 });
-                
             }
             break;
         case FORWARD:
                 if (curr == 0) {
+                    old_pos = curr_position.slice();
                     switch (facing_direction) {
                         case WEST:
-                            forward_matrix = translate(0.01, 0.0, 0.0);
-                            xSnake = 1;
-                            ySnake = NaN;
+                            inc_pos.x = linear_interpolation(speed, 0, max_curr/2, 0, 1);
+                            inc_pos.y = 0;
+                            inc_tran.x = linear_interpolation(speed, 0, max_curr/2, 0, tile_size_max);
+                            inc_tran.y = 0;
                             curr_position[0] += 1;
                             break;
                         case EAST:
-                            forward_matrix = translate(-0.01, 0.0, 0.0);
-                            xSnake = -1;
-                            ySnake = NaN;
+                            inc_pos.x = -linear_interpolation(speed, 0, max_curr/2, 0, 1);
+                            inc_pos.y = 0;
+                            inc_tran.x = -linear_interpolation(speed, 0, max_curr/2, 0, tile_size_max);
+                            inc_tran.y = 0;
                             curr_position[0] -= 1;
                             break;
                         case NORTH:
-                            forward_matrix = translate(0.0, 0.0, 0.01);
-                            xSnake = NaN;
-                            ySnake = 1;
+                            inc_pos.x = 0;
+                            inc_pos.y = linear_interpolation(speed, 0, max_curr/2, 0, 1);
+                            inc_tran.x = 0;
+                            inc_tran.y = linear_interpolation(speed, 0, max_curr/2, 0, tile_size_max);
                             curr_position[1] += 1;
                             break;
                         case SOUTH:
-                            forward_matrix = translate(0.0, 0.0, -0.01);
-                            xSnake = NaN;
-                            ySnake = -1;
+                            inc_pos.x = 0;
+                            inc_pos.y = -linear_interpolation(speed, 0, max_curr/2, 0, 1);
+                            inc_tran.x = 0;
+                            inc_tran.y = -linear_interpolation(speed, 0, max_curr/2, 0, tile_size_max);
                             curr_position[1] -= 1;
                             break;
                         default:
                             throw "animation(): facing_direction corrupted";
                     }
+                    tot_pos.x=0; tot_pos.y=0; tot_tran.x=0; tot_tran.y=0;
                 }
-                if (curr >= tile_size_max) {
+                if (curr >= max_curr/2) {
+                    gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+                    var eye={};
+                    eye.delta_transl = [NaN, 0.0, NaN];
+                    eye.delta_angle = 0;
+
+                    if (inc_tran.y == 0) {
+                        eye.delta_transl[2] = 0.0;
+                        if (inc_tran.x>0) {
+                            eye.delta_transl[0] = tile_size_max;
+                        } else {
+                            eye.delta_transl[0] = -tile_size_max;
+                        }
+                    } else if (inc_tran.x == 0) {
+                        eye.delta_transl[0] = 0.0;
+                        if (inc_tran.y>0) {
+                            eye.delta_transl[2] = tile_size_max;
+                        } else {
+                            eye.delta_transl[2] = -tile_size_max;
+                        }
+                    } else {
+                        throw "animation(): inconsistent inc_tran state"
+                    }
+
+                    var at={};
+                    at.delta_transl = eye.delta_transl;
+
+                    setCamera(eye, at, true);
+                    renderEnv();
+                    theta_food = (theta_food + 1) % 360;
+                    renderEnvObjects(poss, [food, theta_food], [[old_pos[0]+tot_pos.x, old_pos[1]+tot_pos.y], angle_head]);
                     window.requestAnimationFrame(render);
                 } else {
                     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-                    var eye_pos4 = eye_pos.slice();
-                    eye_pos4.push(1.0);
-                    eye_pos4 = apply_matrix4(forward_matrix, eye_pos4);
-                    eye_pos = vec3(eye_pos4);
-                    var at_eye4 = at_eye.slice();
-                    at_eye4.push(1.0);
-                    at_eye4 = apply_matrix4(forward_matrix, at_eye4);
-                    at_eye = vec3(at_eye4);
-                    cameraMatrix = lookAt(eye_pos, at_eye, up_eye);
-                    gl.uniformMatrix4fv( uCameraMatrix, false, flatten(cameraMatrix));
+                    var eye={};
+                    eye.delta_transl = [tot_tran.x, 0.0, tot_tran.y];
+                    eye.delta_angle = 0;
 
+                    var at={};
+                    at.delta_transl = eye.delta_transl;
+
+                    setCamera(eye, at, false);
                     renderEnv();
                     theta_food = (theta_food + 1) % 360;
-                    if (!isNaN(xSnake)) {
-                        var inc = xSnake * linear_interpolation(curr, 0, tile_size_max, 0, 1);
-                        renderEnvObjects(poss, [food, theta_food], [[curr_position[0] - xSnake + inc, curr_position[1]], angle_head]);
-                    } else {
-                        var inc = ySnake * linear_interpolation(curr, 0, tile_size_max, 0, 1);
-                        renderEnvObjects(poss, [food, theta_food], [[curr_position[0], curr_position[1] - ySnake + inc], angle_head]);
-                    }
+                    renderEnvObjects(poss, [food, theta_food], [[old_pos[0]+tot_pos.x, old_pos[1]+tot_pos.y], angle_head]);
+
+                    tot_tran.x += inc_tran.x;
+                    tot_tran.y += inc_tran.y;
+                    tot_pos.x  += inc_pos.x;
+                    tot_pos.y  += inc_pos.y;
 
                     window.requestAnimationFrame(function() {
-                        animation(FORWARD, curr+0.01);
+                        animation(FORWARD, curr+speed);
                     });
                 }
             break;

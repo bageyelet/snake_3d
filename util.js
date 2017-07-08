@@ -92,6 +92,12 @@ function linear_interpolation(v1, min1, max1, min2, max2) {
     return v2;
 }
 
+function fix_round_error(val, mult) {
+    var tmp = val/mult;
+    tmp = Math.round(tmp);
+    return mult*tmp;
+}
+
 function build_env(env_w, env_h) {
     var ris = [];
     for (var i=0; i<env_w; i++) {
