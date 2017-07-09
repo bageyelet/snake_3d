@@ -83,7 +83,7 @@ var snakeheadArray =
   snakehead_vertices[1], snakehead_vertices[7], snakehead_vertices[6]];
 var lenSnakeheadArray = 36;
 
-var snakehead_scalematrix = scalem(0.4,0.5,0.4);
+var snakehead_scalematrix = scalem(0.45,0.55,0.45);
 // **********************************************************************************
 var snakebody_vertices = [
     vec4(-0.18, 0.0 , 0.1 ),
@@ -131,5 +131,5 @@ var snaketailArray =
   snaketail_vertices[2], snaketail_vertices[3], snaketail_vertices[4]];
 var lenSnaketailArray = 18;
 
-var snaketail_scalematrix = scalem(0.3,0.5,0.55);
+var snaketail_scalematrix = scalem(0.3,0.5,0.65);
 // **********************************************************************************

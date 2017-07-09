@@ -17,9 +17,11 @@ var SNAKETAIL       = 5;
 var SQUARE          = 6;
 
 // animations
-var ROTATION_LEFT   = 50;
-var ROTATION_RIGHT  = 51;
-var FORWARD         = 52;
+var ROTATION_LEFT       = 50;
+var ROTATION_RIGHT      = 51;
+var FORWARD             = 52;
+var ROTATION_LEFT_BODY  = 53;
+var ROTATION_RIGHT_BODY = 54;
 
 // facing directions
 var NORTH = 20;

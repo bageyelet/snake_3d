@@ -26,6 +26,12 @@ function List() {
             this._nextPointer = this._nextPointer.next;
         return this._nextPointer;
     }
+    this.getSecond = function() {
+        if (this.head != null)
+            return this.head.next;
+        else
+            return null;
+    }
     this.print = function() {
         var p = this.head;
         while (p!=null) {
@@ -33,17 +39,4 @@ function List() {
             p=p.next;
         }
     }
-}
-var snake = new List();
-snake.add({type:1, pos:[1, 1], angle:0});
-snake.add({type:2, pos:[1, 2], angle:0});
-snake.add({type:3, pos:[1, 3], angle:0});
-
-//console.log(snake);
-
-var el = snake.next();
-while (el != null) {
-    console.log("node", el.data);
-    console.log("prev", el.prev != null? el.prev.data : null);
-    el = snake.next();
 }
