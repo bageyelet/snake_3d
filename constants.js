@@ -22,9 +22,13 @@ var ROTATION_RIGHT      = 51;
 var FORWARD             = 52;
 var ROTATION_LEFT_BODY  = 53;
 var ROTATION_RIGHT_BODY = 54;
+var COMPLETING_ROTATION_LEFT_BODY  = 55;
+var COMPLETING_ROTATION_RIGHT_BODY = 56;
 
 // facing directions
 var NORTH = 20;
 var SOUTH = 21;
 var EAST  = 22;
 var WEST  = 23;
+
+var max_curr=200; var speed=5;
