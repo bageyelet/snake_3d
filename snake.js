@@ -1,3 +1,5 @@
+"use strict";
+
 function* genForward() {
     var inc = linear_interpolation(speed, 0, max_curr, 0, 1);
     var tot=0;
@@ -40,16 +42,31 @@ function* genStraigthen() {
 }
 var straigthenArray = [];
 
-var gFor; var gForRot; var gStr;
+function* genFurtherRotation() {
+    var inc_x = linear_interpolation(speed, 0, max_curr, 0, 1-2*delta);
+    var inc_angle = linear_interpolation(speed, 0, max_curr, 0, 90);
+    var tot = [0, 0]; var tot_angle = 0;
+    for (var i=0; i<max_curr/speed; i++) {
+        tot[0] += inc_x;
+        tot_angle += inc_angle;
+        yield [[tot[0], 0], tot_angle];
+    }
+    yield [[1-2*delta, 0], 90];
+}
+var furtherRotationArray = [];
+
+var gFor; var gForRot; var gStr; var gFurRot;
 function initializePositionUpdater() {
     gFor = genForward();
     gForRot = genForwardRotation();
     gStr = genStraigthen();
+    gFurRot = genFurtherRotation();
 
     for (var i=0; i<max_curr + 1; i+=speed) {
         forwardRotationArray[i] = gForRot.next().value;
         forwardArray[i] = gFor.next().value;
         straigthenArray[i] = gStr.next().value;
+        furtherRotationArray[i] = gFurRot.next().value;
     }
 }
 
@@ -68,63 +85,88 @@ function updateSnakePositions(snake_node, i) {
     switch (prev.data.anim) {
         case FORWARD:
         case ROTATION_LEFT_BODY:
+        case ROTATION_RIGHT_BODY:
             switch (prev.data.direction) {
                 case NORTH:
-                    if (snake_node.data.old_anim == FORWARD || snake_node.data.old_anim == COMPLETING_ROTATION_LEFT_BODY) {
+                    if (snake_node.data.old_anim == FORWARD || snake_node.data.old_anim == COMPLETING_ROTATION_LEFT_BODY || snake_node.data.old_anim ==     COMPLETING_ROTATION_RIGHT_BODY) {
                         snake_node.data.anim = FORWARD;
                         snake_node.data.direction = NORTH;
                         snake_node.data.pos[1] = snake_node.data.old_pos[1] + forwardArray[i][0];
-                    } else if (snake_node.data.old_anim == ROTATION_LEFT_BODY) {
+                    } else if (snake_node.data.old_anim == ROTATION_LEFT_BODY || snake_node.data.old_anim == FURTHER_ROTATION_LEFT) {
                         snake_node.data.anim = COMPLETING_ROTATION_LEFT_BODY;
                         snake_node.data.direction = NORTH;
                         snake_node.data.pos[0] = snake_node.data.old_pos[0] - straigthenArray[i][0][1];
                         snake_node.data.pos[1] = snake_node.data.old_pos[1] + straigthenArray[i][0][0];
                         snake_node.data.angle = snake_node.data.old_angle + straigthenArray[i][1];
+                    } else if (snake_node.data.old_anim == ROTATION_RIGHT_BODY || snake_node.data.old_anim == FURTHER_ROTATION_RIGHT) {
+                        snake_node.data.anim = COMPLETING_ROTATION_RIGHT_BODY;
+                        snake_node.data.direction = NORTH;
+                        snake_node.data.pos[0] = snake_node.data.old_pos[0] + straigthenArray[i][0][1];
+                        snake_node.data.pos[1] = snake_node.data.old_pos[1] + straigthenArray[i][0][0];
+                        snake_node.data.angle = snake_node.data.old_angle - straigthenArray[i][1]; 
                     } else {
                         throw "updateSnakePositions(): invalid old_anim";
                     }
                     break;
                 case SOUTH:
-                    if (snake_node.data.old_anim == FORWARD || snake_node.data.old_anim == COMPLETING_ROTATION_LEFT_BODY) {
+                    if (snake_node.data.old_anim == FORWARD || snake_node.data.old_anim == COMPLETING_ROTATION_LEFT_BODY || snake_node.data.old_anim ==     COMPLETING_ROTATION_RIGHT_BODY) {
                         snake_node.data.anim = FORWARD;
                         snake_node.data.direction = SOUTH;
                         snake_node.data.pos[1] = snake_node.data.old_pos[1] - forwardArray[i][0];
-                    } else if (snake_node.data.old_anim == ROTATION_LEFT_BODY) {
+                    } else if (snake_node.data.old_anim == ROTATION_LEFT_BODY || snake_node.data.old_anim == FURTHER_ROTATION_LEFT) {
                         snake_node.data.anim = COMPLETING_ROTATION_LEFT_BODY;
                         snake_node.data.direction = SOUTH;
                         snake_node.data.pos[0] = snake_node.data.old_pos[0] + straigthenArray[i][0][1];
                         snake_node.data.pos[1] = snake_node.data.old_pos[1] - straigthenArray[i][0][0];
                         snake_node.data.angle = snake_node.data.old_angle + straigthenArray[i][1];
+                    } else if (snake_node.data.old_anim == ROTATION_RIGHT_BODY || snake_node.data.old_anim == FURTHER_ROTATION_RIGHT) {
+                        snake_node.data.anim = COMPLETING_ROTATION_RIGHT_BODY;
+                        snake_node.data.direction = SOUTH;
+                        snake_node.data.pos[0] = snake_node.data.old_pos[0] - straigthenArray[i][0][1];
+                        snake_node.data.pos[1] = snake_node.data.old_pos[1] - straigthenArray[i][0][0];
+                        snake_node.data.angle = snake_node.data.old_angle - straigthenArray[i][1]; 
                     } else {
                         throw "updateSnakePositions(): invalid old_anim";
                     }
                     break;
                 case EAST:
-                    if (snake_node.data.old_anim == FORWARD || snake_node.data.old_anim == COMPLETING_ROTATION_LEFT_BODY) {
+                    if (snake_node.data.old_anim == FORWARD || snake_node.data.old_anim == COMPLETING_ROTATION_LEFT_BODY || snake_node.data.old_anim ==     COMPLETING_ROTATION_RIGHT_BODY) {
                         snake_node.data.anim = FORWARD;
                         snake_node.data.direction = EAST;
                         snake_node.data.pos[0] = snake_node.data.old_pos[0] - forwardArray[i][0]; 
-                    } else if (snake_node.data.old_anim == ROTATION_LEFT_BODY) {
+                    } else if (snake_node.data.old_anim == ROTATION_LEFT_BODY || snake_node.data.old_anim == FURTHER_ROTATION_LEFT) {
                         snake_node.data.anim = COMPLETING_ROTATION_LEFT_BODY;
                         snake_node.data.direction = EAST;
                         snake_node.data.pos[0] = snake_node.data.old_pos[0] - straigthenArray[i][0][0];
                         snake_node.data.pos[1] = snake_node.data.old_pos[1] - straigthenArray[i][0][1];
                         snake_node.data.angle = snake_node.data.old_angle + straigthenArray[i][1];
+                    } else if (snake_node.data.old_anim == ROTATION_RIGHT_BODY || snake_node.data.old_anim == FURTHER_ROTATION_RIGHT) {
+                        snake_node.data.anim = COMPLETING_ROTATION_RIGHT_BODY;
+                        snake_node.data.direction = EAST;
+                        snake_node.data.pos[0] = snake_node.data.old_pos[0] - straigthenArray[i][0][0];
+                        snake_node.data.pos[1] = snake_node.data.old_pos[1] + straigthenArray[i][0][1];
+                        snake_node.data.angle = snake_node.data.old_angle - straigthenArray[i][1];
                     } else {
                         throw "updateSnakePositions(): invalid old_anim";
                     }
                     break;
                 case WEST:
-                    if (snake_node.data.old_anim == FORWARD || snake_node.data.old_anim == COMPLETING_ROTATION_LEFT_BODY) {
+                    if (snake_node.data.old_anim == FORWARD || snake_node.data.old_anim == COMPLETING_ROTATION_LEFT_BODY || snake_node.data.old_anim ==     COMPLETING_ROTATION_RIGHT_BODY) {
                         snake_node.data.anim = FORWARD;
                         snake_node.data.direction = WEST;
                         snake_node.data.pos[0] = snake_node.data.old_pos[0] + forwardArray[i][0]; 
-                    } else if (snake_node.data.old_anim == ROTATION_LEFT_BODY) {
+                    } else if (snake_node.data.old_anim == ROTATION_LEFT_BODY || snake_node.data.old_anim == FURTHER_ROTATION_LEFT) {
                         snake_node.data.anim = COMPLETING_ROTATION_LEFT_BODY;
                         snake_node.data.direction = WEST;
                         snake_node.data.pos[0] = snake_node.data.old_pos[0] + straigthenArray[i][0][0];
                         snake_node.data.pos[1] = snake_node.data.old_pos[1] + straigthenArray[i][0][1];
                         snake_node.data.angle = snake_node.data.old_angle + straigthenArray[i][1];
+                    } else if (snake_node.data.old_anim == ROTATION_RIGHT_BODY || snake_node.data.old_anim == FURTHER_ROTATION_RIGHT) {
+                        snake_node.data.anim = COMPLETING_ROTATION_RIGHT_BODY;
+                        snake_node.data.direction = WEST;
+                        snake_node.data.pos[0] = snake_node.data.old_pos[0] + straigthenArray[i][0][0];
+                        snake_node.data.pos[1] = snake_node.data.old_pos[1] - straigthenArray[i][0][1];
+                        snake_node.data.angle = snake_node.data.old_angle - straigthenArray[i][1];
                     } else {
                         throw "updateSnakePositions(): invalid old_anim";
                     }
@@ -134,39 +176,134 @@ function updateSnakePositions(snake_node, i) {
             }
             break;
         case ROTATION_LEFT:
-        case COMPLETING_ROTATION_LEFT_BODY:        
+        case COMPLETING_ROTATION_LEFT_BODY:
+        case FURTHER_ROTATION_LEFT: 
             switch (prev.data.direction) {
                 case NORTH:
-                    snake_node.data.anim = ROTATION_LEFT_BODY;
                     snake_node.data.direction = EAST;
-                    snake_node.data.pos[0] = snake_node.data.old_pos[0] - forwardRotationArray[i][0][0];
-                    snake_node.data.pos[1] = snake_node.data.old_pos[1] + forwardRotationArray[i][0][1];
-                    snake_node.data.angle = snake_node.data.old_angle + forwardRotationArray[i][1];
+                    if (snake_node.data.old_anim == ROTATION_LEFT_BODY) {
+                        snake_node.data.anim = FURTHER_ROTATION_LEFT;
+                        snake_node.data.pos[0] = snake_node.data.old_pos[0] - furtherRotationArray[i][0][0];
+                        snake_node.data.pos[1] = snake_node.data.old_pos[1] + furtherRotationArray[i][0][1];
+                        snake_node.data.angle = snake_node.data.old_angle + furtherRotationArray[i][1];
+                    } else if (snake_node.data.old_anim == ROTATION_RIGHT_BODY) {
+                        snake_node.data.anim = FURTHER_ROTATION_RIGHT;
+                        snake_node.data.direction = EAST;
+                        snake_node.data.pos[0] = snake_node.data.old_pos[0] - furtherRotationArray[i][0][0];
+                        snake_node.data.pos[1] = snake_node.data.old_pos[1] + furtherRotationArray[i][0][1];
+                        //snake_node.data.angle = snake_node.data.old_angle + furtherRotationArray[i][1];
+                    } else {
+                        snake_node.data.anim = ROTATION_LEFT_BODY;
+                        snake_node.data.pos[0] = snake_node.data.old_pos[0] - forwardRotationArray[i][0][0];
+                        snake_node.data.pos[1] = snake_node.data.old_pos[1] + forwardRotationArray[i][0][1];
+                        snake_node.data.angle = snake_node.data.old_angle + forwardRotationArray[i][1];
+                    }
                     break;
                 case WEST:
-                    snake_node.data.anim = ROTATION_LEFT_BODY;
                     snake_node.data.direction = NORTH;
-                    snake_node.data.pos[0] = snake_node.data.old_pos[0] + forwardRotationArray[i][0][1];
-                    snake_node.data.pos[1] = snake_node.data.old_pos[1] + forwardRotationArray[i][0][0];
-                    snake_node.data.angle = snake_node.data.old_angle + forwardRotationArray[i][1];
+                    if (snake_node.data.old_anim == ROTATION_LEFT_BODY) {
+                        snake_node.data.anim = FURTHER_ROTATION_LEFT;
+                        snake_node.data.pos[0] = snake_node.data.old_pos[0] + furtherRotationArray[i][0][1];
+                        snake_node.data.pos[1] = snake_node.data.old_pos[1] + furtherRotationArray[i][0][0];
+                        snake_node.data.angle = snake_node.data.old_angle + furtherRotationArray[i][1];
+                    } else {
+                        snake_node.data.anim = ROTATION_LEFT_BODY;
+                        snake_node.data.pos[0] = snake_node.data.old_pos[0] + forwardRotationArray[i][0][1];
+                        snake_node.data.pos[1] = snake_node.data.old_pos[1] + forwardRotationArray[i][0][0];
+                        snake_node.data.angle = snake_node.data.old_angle + forwardRotationArray[i][1];
+                    }
                     break;
                 case EAST:
-                    snake_node.data.anim = ROTATION_LEFT_BODY;
                     snake_node.data.direction = SOUTH;
-                    snake_node.data.pos[0] = snake_node.data.old_pos[0] - forwardRotationArray[i][0][1];
-                    snake_node.data.pos[1] = snake_node.data.old_pos[1] - forwardRotationArray[i][0][0];
-                    snake_node.data.angle = snake_node.data.old_angle + forwardRotationArray[i][1];
+                    if (snake_node.data.old_anim == ROTATION_LEFT_BODY) {
+                        snake_node.data.anim = FURTHER_ROTATION_LEFT;
+                        snake_node.data.pos[0] = snake_node.data.old_pos[0] - furtherRotationArray[i][0][1];
+                        snake_node.data.pos[1] = snake_node.data.old_pos[1] - furtherRotationArray[i][0][0];
+                        snake_node.data.angle = snake_node.data.old_angle + furtherRotationArray[i][1];
+                    } else {
+                        snake_node.data.anim = ROTATION_LEFT_BODY;
+                        snake_node.data.pos[0] = snake_node.data.old_pos[0] - forwardRotationArray[i][0][1];
+                        snake_node.data.pos[1] = snake_node.data.old_pos[1] - forwardRotationArray[i][0][0];
+                        snake_node.data.angle = snake_node.data.old_angle + forwardRotationArray[i][1];
+                    }
                     break;
                 case SOUTH:
-                    snake_node.data.anim = ROTATION_LEFT_BODY;
                     snake_node.data.direction = WEST;
-                    snake_node.data.pos[0] = snake_node.data.old_pos[0] + forwardRotationArray[i][0][0];
-                    snake_node.data.pos[1] = snake_node.data.old_pos[1] - forwardRotationArray[i][0][1];
-                    snake_node.data.angle = snake_node.data.old_angle + forwardRotationArray[i][1];
+                    if (snake_node.data.old_anim == ROTATION_LEFT_BODY) {
+                        snake_node.data.anim = FURTHER_ROTATION_LEFT;
+                        snake_node.data.pos[0] = snake_node.data.old_pos[0] + furtherRotationArray[i][0][0];
+                        snake_node.data.pos[1] = snake_node.data.old_pos[1] - furtherRotationArray[i][0][1];
+                        snake_node.data.angle = snake_node.data.old_angle + furtherRotationArray[i][1];
+                    } else {
+                        snake_node.data.anim = ROTATION_LEFT_BODY;
+                        snake_node.data.pos[0] = snake_node.data.old_pos[0] + forwardRotationArray[i][0][0];
+                        snake_node.data.pos[1] = snake_node.data.old_pos[1] - forwardRotationArray[i][0][1];
+                        snake_node.data.angle = snake_node.data.old_angle + forwardRotationArray[i][1];
+                    }
                     break;
             }
             break;
         case ROTATION_RIGHT:
+        case COMPLETING_ROTATION_RIGHT_BODY:
+        case FURTHER_ROTATION_RIGHT:
+            switch (prev.data.direction) {
+                case NORTH:
+                    snake_node.data.direction = WEST;
+                    if (snake_node.data.old_anim == ROTATION_RIGHT_BODY) {
+                        snake_node.data.anim = FURTHER_ROTATION_RIGHT;
+                        snake_node.data.pos[0] = snake_node.data.old_pos[0] + furtherRotationArray[i][0][0];
+                        snake_node.data.pos[1] = snake_node.data.old_pos[1] + furtherRotationArray[i][0][1];
+                        snake_node.data.angle = snake_node.data.old_angle - furtherRotationArray[i][1];
+                    } else {
+                        snake_node.data.anim = ROTATION_RIGHT_BODY;
+                        snake_node.data.pos[0] = snake_node.data.old_pos[0] + forwardRotationArray[i][0][0];
+                        snake_node.data.pos[1] = snake_node.data.old_pos[1] + forwardRotationArray[i][0][1];
+                        snake_node.data.angle = snake_node.data.old_angle - forwardRotationArray[i][1];
+                    }
+                    break;
+                case WEST:
+                    snake_node.data.direction = SOUTH;
+                    if (snake_node.data.old_anim == ROTATION_RIGHT_BODY) {
+                        snake_node.data.anim = FURTHER_ROTATION_RIGHT;
+                        snake_node.data.pos[0] = snake_node.data.old_pos[0] + furtherRotationArray[i][0][1];
+                        snake_node.data.pos[1] = snake_node.data.old_pos[1] - furtherRotationArray[i][0][0];
+                        snake_node.data.angle = snake_node.data.old_angle - furtherRotationArray[i][1];
+                    } else {
+                        snake_node.data.anim = ROTATION_RIGHT_BODY;
+                        snake_node.data.pos[0] = snake_node.data.old_pos[0] + forwardRotationArray[i][0][1];
+                        snake_node.data.pos[1] = snake_node.data.old_pos[1] - forwardRotationArray[i][0][0];
+                        snake_node.data.angle = snake_node.data.old_angle - forwardRotationArray[i][1];
+                    }
+                    break;
+                case EAST:
+                    snake_node.data.direction = NORTH;
+                    if (snake_node.data.old_anim == ROTATION_RIGHT_BODY) {
+                        snake_node.data.anim = FURTHER_ROTATION_RIGHT;
+                        snake_node.data.pos[0] = snake_node.data.old_pos[0] - furtherRotationArray[i][0][1];
+                        snake_node.data.pos[1] = snake_node.data.old_pos[1] + furtherRotationArray[i][0][0];
+                        snake_node.data.angle = snake_node.data.old_angle - furtherRotationArray[i][1];
+                    } else {
+                        snake_node.data.anim = ROTATION_RIGHT_BODY;
+                        snake_node.data.pos[0] = snake_node.data.old_pos[0] - forwardRotationArray[i][0][1];
+                        snake_node.data.pos[1] = snake_node.data.old_pos[1] + forwardRotationArray[i][0][0];
+                        snake_node.data.angle = snake_node.data.old_angle - forwardRotationArray[i][1];
+                    }
+                    break;
+                case SOUTH:
+                    snake_node.data.direction = EAST;
+                    if (snake_node.data.old_anim == ROTATION_RIGHT_BODY) {
+                        snake_node.data.anim = FURTHER_ROTATION_RIGHT;
+                        snake_node.data.pos[0] = snake_node.data.old_pos[0] - furtherRotationArray[i][0][0];
+                        snake_node.data.pos[1] = snake_node.data.old_pos[1] - furtherRotationArray[i][0][1];
+                        snake_node.data.angle = snake_node.data.old_angle - furtherRotationArray[i][1];
+                    } else {
+                        snake_node.data.anim = ROTATION_RIGHT_BODY;
+                        snake_node.data.pos[0] = snake_node.data.old_pos[0] - forwardRotationArray[i][0][0];
+                        snake_node.data.pos[1] = snake_node.data.old_pos[1] - forwardRotationArray[i][0][1];
+                        snake_node.data.angle = snake_node.data.old_angle - forwardRotationArray[i][1];
+                    }
+                    break;
+            }
             break;
         default:
             break;

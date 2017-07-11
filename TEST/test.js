@@ -48,18 +48,33 @@ function* genStraigthen() {
 }
 var straigthenArray = [];
 
+function* genFurtherRotation() {
+    var inc_x = linear_interpolation(speed, 0, max_curr, 0, 1-2*delta);
+    var inc_angle = linear_interpolation(speed, 0, max_curr, 0, 90);
+    var tot = [0, 0]; var tot_angle = 0;
+    for (var i=0; i<max_curr/speed; i++) {
+        tot[0] += inc_x;
+        tot_angle += inc_angle;
+        yield [[tot[0], 0], tot_angle];
+    }
+    yield [[1-2*delta, 0], 90];
+}
+var furtherRotationArray = [];
+
 var gFor; var gForRot;
 function initializePositionUpdater() {
     gFor = genForward();
     gForRot = genForwardRotation();
     gStr = genStraigthen();
+    gFurRot = genFurtherRotation();
 
     for (var i=0; i<max_curr + 1; i+=speed) {
         forwardRotationArray[i] = gForRot.next().value;
         forwardArray[i] = gFor.next().value;
         straigthenArray[i] = gStr.next().value;
+        furtherRotationArray[i] = gFurRot.next().value;
     }
 }
 
 initializePositionUpdater();
-console.log(forwardRotationArray);
+console.log(furtherRotationArray);

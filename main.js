@@ -6,8 +6,8 @@ var square_size = 1.0;
 var tile_size_max = 0.25;
 var tile_size_min = 0.22;
 
-var env_size_w = 20;
-var env_size_h = 20;
+var env_size_w = 25;
+var env_size_h = 25;
 var poss;
 var food; var theta_food = 0;
 
@@ -64,7 +64,7 @@ function renderTile(modelViewMatrix) {
 
 function renderEnv() {
 
-    gl.uniform4fv( gl.getUniformLocation(program, "color"), PURPLE);
+    gl.uniform4fv( uColor, PURPLE);
 
     var scalematrix = scalem(tile_size_min,1.0,tile_size_min);
 
@@ -80,7 +80,7 @@ function renderObject(type, positions, theta) {
     switch(type) {
         case PIRAMID:
 
-            gl.uniform4fv( gl.getUniformLocation(program, "color"), RED);
+            gl.uniform4fv( uColor, RED);
 
             for (var i=0; i<len; i++) {
                 var posX = positions[i][0]; var posY = positions[i][1];
@@ -93,7 +93,7 @@ function renderObject(type, positions, theta) {
             break;
         case PARALLELEPIPED:
 
-            gl.uniform4fv( gl.getUniformLocation(program, "color"), BLUE);
+            gl.uniform4fv( uColor, BLUE);
 
             for (var i = 0; i < len; i++) {
                 var posX = positions[i][0]; var posY = positions[i][1];
@@ -106,7 +106,7 @@ function renderObject(type, positions, theta) {
             break;
         case SNAKEHEAD:
 
-            gl.uniform4fv( gl.getUniformLocation(program, "color"), GREEN);
+            gl.uniform4fv( uColor, GREEN);
 
             for (var i = 0; i < len; i++) {
                 var posX = positions[i][0]; var posY = positions[i][1];
@@ -119,7 +119,7 @@ function renderObject(type, positions, theta) {
             break;
         case SNAKEBODY:
 
-            gl.uniform4fv( gl.getUniformLocation(program, "color"), GREEN);
+            gl.uniform4fv( uColor, GREEN);
 
             for (var i = 0; i < len; i++) {
                 var posX = positions[i][0]; var posY = positions[i][1];
@@ -133,7 +133,7 @@ function renderObject(type, positions, theta) {
 
         case SNAKETAIL:
 
-            gl.uniform4fv( gl.getUniformLocation(program, "color"), GREEN);
+            gl.uniform4fv( uColor, GREEN);
 
             for (var i = 0; i < len; i++) {
                 var posX = positions[i][0]; var posY = positions[i][1];
@@ -221,6 +221,7 @@ window.onload = function init() {
     uModelViewMatrix = gl.getUniformLocation( program, "modelViewMatrix");
     uProjectionMatrix = gl.getUniformLocation(program, "projectionMatrix");
     uCameraMatrix = gl.getUniformLocation(program, "cameraMatrix");
+    uColor = gl.getUniformLocation(program, "color");
 
     gl.uniformMatrix4fv( uProjectionMatrix, false, flatten(projectionMatrix));
 
@@ -252,7 +253,7 @@ window.onload = function init() {
     }
 
     food = [];
-    food.push([10, 10]);
+    food.push([8, 10]);
     food.push([11, 16]);
 
     snake_head = {};
@@ -263,7 +264,10 @@ window.onload = function init() {
     snake_head.direction = NORTH;
     snake_head.anim = null;
 
-    snakeList.add({type:SNAKETAIL, pos:[snake_head.pos[0], snake_head.pos[1]-3], angle:snake_head.angle, direction:snake_head.direction, anim: FORWARD});
+    snakeList.add({type:SNAKETAIL, pos:[snake_head.pos[0], snake_head.pos[1]-6], angle:snake_head.angle, direction:snake_head.direction, anim: FORWARD});
+    snakeList.add({type:SNAKEBODY, pos:[snake_head.pos[0], snake_head.pos[1]-5], angle:snake_head.angle, direction:snake_head.direction, anim: FORWARD});
+    snakeList.add({type:SNAKEBODY, pos:[snake_head.pos[0], snake_head.pos[1]-4], angle:snake_head.angle, direction:snake_head.direction, anim: FORWARD});
+    snakeList.add({type:SNAKEBODY, pos:[snake_head.pos[0], snake_head.pos[1]-3], angle:snake_head.angle, direction:snake_head.direction, anim: FORWARD});
     snakeList.add({type:SNAKEBODY, pos:[snake_head.pos[0], snake_head.pos[1]-2], angle:snake_head.angle, direction:snake_head.direction, anim: FORWARD});
     snakeList.add({type:SNAKEBODY, pos:[snake_head.pos[0], snake_head.pos[1]-1], angle:snake_head.angle, direction:snake_head.direction, anim: FORWARD});
     snakeList.add(snake_head);
@@ -420,9 +424,11 @@ function animation(type, curr) {
             if (curr == 0) {
                 old_pos = curr_position.slice();
                 initializeOldPos(snakeList.head);
+                snake_head.anim = ROTATION_RIGHT;
                 switch (facing_direction) {
                     case NORTH:
                         facing_direction = EAST;
+                        snake_head.direction = EAST;
                         curr_position[0] -= 1;
                         inc_pos.x = -linear_interpolation(speed, 0, max_curr, 0, 1);
                         inc_pos.y = 0;
@@ -431,6 +437,7 @@ function animation(type, curr) {
                         break;
                     case SOUTH:
                         facing_direction = WEST;
+                        snake_head.direction = WEST;
                         curr_position[0] += 1;
                         inc_pos.x = linear_interpolation(speed, 0, max_curr, 0, 1);
                         inc_pos.y = 0;
@@ -439,6 +446,7 @@ function animation(type, curr) {
                         break;
                     case EAST:
                         facing_direction = SOUTH;
+                        snake_head.direction = SOUTH;
                         curr_position[1] -= 1;
                         inc_pos.x = 0;
                         inc_pos.y = -linear_interpolation(speed, 0, max_curr, 0, 1);
@@ -447,6 +455,7 @@ function animation(type, curr) {
                         break;
                     case WEST:
                         facing_direction = NORTH;
+                        snake_head.direction = NORTH;
                         curr_position[1] += 1;
                         inc_pos.x = 0;
                         inc_pos.y = linear_interpolation(speed, 0, max_curr, 0, 1);
@@ -494,7 +503,11 @@ function animation(type, curr) {
                 setCamera(eye, at, true);
                 renderEnv();
                 theta_food = (theta_food + 1) % 360;
-                renderEnvObjects(poss, [food, theta_food], [curr_position, angle_head]);
+                // renderEnvObjects(poss, [food, theta_food], [curr_position, angle_head]);
+                snake_head.pos = curr_position;
+                snake_head.angle = angle_head;
+                updateSnakePositions(snakeList.getSecond(), curr);
+                renderEnvObjects(poss, [food, theta_food]);
 
                 window.requestAnimationFrame(render);
             } else {
@@ -510,7 +523,11 @@ function animation(type, curr) {
                 setCamera(eye, at, false);
                 renderEnv();
                 theta_food = (theta_food + 1) % 360;
-                renderEnvObjects(poss, [food, theta_food], [[old_pos[0]+tot_pos.x, old_pos[1]+tot_pos.y], angle_head]);
+                //renderEnvObjects(poss, [food, theta_food], [[old_pos[0]+tot_pos.x, old_pos[1]+tot_pos.y], angle_head]);
+                snake_head.pos = [old_pos[0]+tot_pos.x, old_pos[1]+tot_pos.y];
+                snake_head.angle = angle_head;
+                updateSnakePositions(snakeList.getSecond(), curr);
+                renderEnvObjects(poss, [food, theta_food]);
 
                 angle_head += inc_rot;
                 tot_rot    += inc_rot;
