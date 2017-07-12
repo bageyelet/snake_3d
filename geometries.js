@@ -83,7 +83,7 @@ var snakeheadArray =
   snakehead_vertices[1], snakehead_vertices[7], snakehead_vertices[6]];
 var lenSnakeheadArray = 36;
 
-var snakehead_scalematrix = scalem(0.43,0.55,0.45);
+var snakehead_scalematrix = scalem(0.43,0.55,0.25);
 // **********************************************************************************
 var snakebody_vertices = [
     vec4(-0.18, 0.0 , 0.1 ),
@@ -112,7 +112,7 @@ var snakebodyArray =
   snakebody_vertices[4], snakebody_vertices[0], snakebody_vertices[7]];
 var lenSnakebodyArray = 36;
 
-var snakebody_scalematrix = scalem(0.3,0.5,1.2);
+var snakebody_scalematrix = scalem(0.3,0.5,1.0);
 // **********************************************************************************
 var snaketail_vertices = [
     vec4(-0.18, 0.0 , 0.2 ),
@@ -131,5 +131,5 @@ var snaketailArray =
   snaketail_vertices[2], snaketail_vertices[3], snaketail_vertices[4]];
 var lenSnaketailArray = 18;
 
-var snaketail_scalematrix = scalem(0.3,0.5,0.65);
+var snaketail_scalematrix = scalem(0.3,0.5,0.45);
 // **********************************************************************************

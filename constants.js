@@ -35,4 +35,4 @@ var SOUTH = 21;
 var EAST  = 22;
 var WEST  = 23;
 
-var max_curr=200; var speed=5;
+var max_curr=200; var speed=10;

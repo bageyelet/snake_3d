@@ -3,10 +3,11 @@
 function* genForward() {
     var inc = linear_interpolation(speed, 0, max_curr, 0, 1);
     var tot=0;
-    for (var i=0; i<max_curr/speed; i++) {
-        tot+=inc;
+    for (var i=0; i<max_curr/speed ; i++) {
         yield [tot, 0];
+        tot+=inc;
     }
+    yield [1, 0];
     yield [1, 0];
 }
 var forwardArray = [];
@@ -15,30 +16,32 @@ var delta = 0.28;
 function* genForwardRotation() {
     var inc_x = linear_interpolation(speed, 0, max_curr, 0, 1-delta);
     var inc_y = linear_interpolation(speed, 0, max_curr, 0, delta);
-    var inc_angle = linear_interpolation(speed, 0, max_curr, 0, 45);
+    var inc_angle = linear_interpolation(speed, 0, max_curr, 0, 35);
     var tot = [0, 0]; var tot_angle = 0;
-    for (var i=0; i<max_curr/speed; i++) {
+    for (var i=0; i<max_curr/speed ; i++) {
+        yield [[tot[0], tot[1]], tot_angle];
         tot[0] += inc_x;
         tot[1] += inc_y;
         tot_angle += inc_angle;
-        yield [[tot[0], tot[1]], tot_angle];
     }
-    yield [[1-delta, delta], 45];
+    yield [[1-delta, delta], 35];
+    yield [[1-delta, delta], 35];
 }
 var forwardRotationArray = [];
 
 function* genStraigthen() {
     var inc_x = linear_interpolation(speed, 0, max_curr, 0, 1-delta);
     var inc_y = linear_interpolation(speed, 0, max_curr, 0, delta);
-    var inc_angle = linear_interpolation(speed, 0, max_curr, 0, 45);
+    var inc_angle = linear_interpolation(speed, 0, max_curr, 0, 55);
     var tot = [0, 0]; var tot_angle = 0;
-    for (var i=0; i<max_curr/speed; i++) {
+    for (var i=0; i<max_curr/speed ; i++) {
+        yield [[tot[0], tot[1]], tot_angle];
         tot[0] += inc_x;
         tot[1] += inc_y;
         tot_angle += inc_angle;
-        yield [[tot[0], tot[1]], tot_angle];
     }
-    yield [[1-delta, delta], 45];
+    yield [[1-delta, delta], 55];
+    yield [[1-delta, delta], 55];
 }
 var straigthenArray = [];
 
@@ -46,11 +49,12 @@ function* genFurtherRotation() {
     var inc_x = linear_interpolation(speed, 0, max_curr, 0, 1-2*delta);
     var inc_angle = linear_interpolation(speed, 0, max_curr, 0, 90);
     var tot = [0, 0]; var tot_angle = 0;
-    for (var i=0; i<max_curr/speed; i++) {
+    for (var i=0; i<max_curr/speed ; i++) {
+        yield [[tot[0], 0], tot_angle];
         tot[0] += inc_x;
         tot_angle += inc_angle;
-        yield [[tot[0], 0], tot_angle];
     }
+    yield [[1-2*delta, 0], 90];
     yield [[1-2*delta, 0], 90];
 }
 var furtherRotationArray = [];
@@ -58,15 +62,16 @@ var furtherRotationArray = [];
 function* genFurtherRotation2() {
     var inc_x = linear_interpolation(speed, 0, max_curr, 0, 1-2*delta);
     var inc_y = linear_interpolation(speed, 0, max_curr, 0, 2*delta);
-    var inc_angle = linear_interpolation(speed, 0, max_curr, 0, 0);
+    var inc_angle = linear_interpolation(speed, 0, max_curr, 0, -20);
     var tot = [0, 0]; var tot_angle = 0;
-    for (var i=0; i<max_curr/speed; i++) {
+    for (var i=0; i<max_curr/speed ; i++) {
+        yield [[tot[0], tot[1]], tot_angle];
         tot[0] += inc_x;
         tot[1] += inc_y;
         tot_angle += inc_angle;
-        yield [[tot[0], tot[1]], tot_angle];
     }
-    yield [[1-2*delta, 2*delta], 0];
+    yield [[1-2*delta, 2*delta], -20];
+    yield [[1-2*delta, 2*delta], -20];
 }
 var furtherRotation2Array = [];
 
@@ -78,12 +83,13 @@ function initializePositionUpdater() {
     gFurRot = genFurtherRotation();
     gFur2Rot = genFurtherRotation2();
 
-    for (var i=0; i<max_curr + 1; i+=speed) {
+    for (var i=0; i<max_curr + speed + 1; i+=speed) {
         forwardRotationArray[i] = gForRot.next().value;
         forwardArray[i] = gFor.next().value;
         straigthenArray[i] = gStr.next().value;
         furtherRotationArray[i] = gFurRot.next().value;
         furtherRotation2Array[i] = gFur2Rot.next().value;
+        
     }
 }
 
@@ -209,6 +215,7 @@ function updateFirstBodyPosition(snake_node, i) {
                         snake_node.data.anim = FURTHER_ROTATION2_LEFT;
                         snake_node.data.pos[0] = snake_node.data.old_pos[0] - furtherRotation2Array[i][0][0];
                         snake_node.data.pos[1] = snake_node.data.old_pos[1] + furtherRotation2Array[i][0][1];
+                        snake_node.data.angle = snake_node.data.old_angle + furtherRotation2Array[i][1];
                     } else {
                         snake_node.data.anim = ROTATION_LEFT_BODY;
                         snake_node.data.pos[0] = snake_node.data.old_pos[0] - forwardRotationArray[i][0][0];
@@ -225,8 +232,9 @@ function updateFirstBodyPosition(snake_node, i) {
                         snake_node.data.angle = snake_node.data.old_angle + furtherRotationArray[i][1];
                     } else if (snake_node.data.old_anim == ROTATION_RIGHT_BODY || snake_node.data.old_anim == FURTHER_ROTATION_RIGHT) {
                         snake_node.data.anim = FURTHER_ROTATION2_LEFT;
-                        snake_node.data.pos[0] = snake_node.data.old_pos[0] + furtherRotation2Array[i][0][0];
-                        snake_node.data.pos[1] = snake_node.data.old_pos[1] + furtherRotation2Array[i][0][1];
+                        snake_node.data.pos[0] = snake_node.data.old_pos[0] + furtherRotation2Array[i][0][1];
+                        snake_node.data.pos[1] = snake_node.data.old_pos[1] + furtherRotation2Array[i][0][0];
+                        snake_node.data.angle = snake_node.data.old_angle + furtherRotation2Array[i][1];
                     } else {
                         snake_node.data.anim = ROTATION_LEFT_BODY;
                         snake_node.data.pos[0] = snake_node.data.old_pos[0] + forwardRotationArray[i][0][1];
@@ -243,8 +251,9 @@ function updateFirstBodyPosition(snake_node, i) {
                         snake_node.data.angle = snake_node.data.old_angle + furtherRotationArray[i][1];
                     } else if (snake_node.data.old_anim == ROTATION_RIGHT_BODY || snake_node.data.old_anim == FURTHER_ROTATION_RIGHT) {
                         snake_node.data.anim = FURTHER_ROTATION2_LEFT;
-                        snake_node.data.pos[0] = snake_node.data.old_pos[0] - furtherRotation2Array[i][0][0];
-                        snake_node.data.pos[1] = snake_node.data.old_pos[1] - furtherRotation2Array[i][0][1];
+                        snake_node.data.pos[0] = snake_node.data.old_pos[0] - furtherRotation2Array[i][0][1];
+                        snake_node.data.pos[1] = snake_node.data.old_pos[1] - furtherRotation2Array[i][0][0];
+                        snake_node.data.angle = snake_node.data.old_angle + furtherRotation2Array[i][1];
                     } else {
                         snake_node.data.anim = ROTATION_LEFT_BODY;
                         snake_node.data.pos[0] = snake_node.data.old_pos[0] - forwardRotationArray[i][0][1];
@@ -263,6 +272,7 @@ function updateFirstBodyPosition(snake_node, i) {
                         snake_node.data.anim = FURTHER_ROTATION2_LEFT;
                         snake_node.data.pos[0] = snake_node.data.old_pos[0] + furtherRotation2Array[i][0][0];
                         snake_node.data.pos[1] = snake_node.data.old_pos[1] - furtherRotation2Array[i][0][1];
+                        snake_node.data.angle = snake_node.data.old_angle + furtherRotation2Array[i][1];
                     } else {
                         snake_node.data.anim = ROTATION_LEFT_BODY;
                         snake_node.data.pos[0] = snake_node.data.old_pos[0] + forwardRotationArray[i][0][0];
@@ -574,24 +584,28 @@ function updateSnakePositions(snake_node, i) {
                         snake_node.data.anim = FURTHER_ROTATION2_LEFT;
                         snake_node.data.pos[0] = snake_node.data.old_pos[0] - furtherRotation2Array[i][0][1];
                         snake_node.data.pos[1] = snake_node.data.old_pos[1] - furtherRotation2Array[i][0][0];
+                        snake_node.data.angle = snake_node.data.old_angle + furtherRotation2Array[i][1];
                         break;
                     case WEST:
                         snake_node.data.direction = WEST;
                         snake_node.data.anim = FURTHER_ROTATION2_LEFT;
                         snake_node.data.pos[0] = snake_node.data.old_pos[0] + furtherRotation2Array[i][0][0];
                         snake_node.data.pos[1] = snake_node.data.old_pos[1] - furtherRotation2Array[i][0][1];
+                        snake_node.data.angle = snake_node.data.old_angle + furtherRotation2Array[i][1];
                         break;
                     case EAST:
                         snake_node.data.direction = EAST;
                         snake_node.data.anim = FURTHER_ROTATION2_LEFT;
                         snake_node.data.pos[0] = snake_node.data.old_pos[0] - furtherRotation2Array[i][0][0];
                         snake_node.data.pos[1] = snake_node.data.old_pos[1] + furtherRotation2Array[i][0][1];
+                        snake_node.data.angle = snake_node.data.old_angle + furtherRotation2Array[i][1];
                         break;
                     case NORTH:
                         snake_node.data.direction = NORTH;
                         snake_node.data.anim = FURTHER_ROTATION2_LEFT;
                         snake_node.data.pos[0] = snake_node.data.old_pos[0] + furtherRotation2Array[i][0][1];
                         snake_node.data.pos[1] = snake_node.data.old_pos[1] + furtherRotation2Array[i][0][0];
+                        snake_node.data.angle = snake_node.data.old_angle + furtherRotation2Array[i][1];
                         break;
                 }
                 break;
