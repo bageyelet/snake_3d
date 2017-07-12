@@ -168,7 +168,6 @@ function renderSnake() {
 }
 
 // food has two components: the first is the vector of coordinates, the second is the angle
-// snake has two components: the first is the vector of coordinates, the second is the angle
 // at is a boolean!
 function renderEnvObjects(obstacles, food, snake) {
     renderObject(PIRAMID, obstacles, 0);
