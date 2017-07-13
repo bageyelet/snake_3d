@@ -53,8 +53,8 @@ var piramidShininess = 500.0;
 var piramidDiffuseProduct  = mult(piramidDiffuseParameter,  lightDiffuse);
 var piramidSpecularProduct = mult(piramidSpecularParameter, lightSpecular);
 
-var squareDiffuseParameter  = vec4( 0.2, 0.2, 0.2, 0.2 );
-var squareSpecularParameter = vec4( 0.5, 0.5, 0.5, 0.5 );
+var squareDiffuseParameter  = vec4( 0.2, 0.1, 0.2, 0.2 );
+var squareSpecularParameter = vec4( 0.5, 0.2, 0.5, 0.5 );
 var squareShininess = 20.0;
 var squareDiffuseProduct  = mult(squareDiffuseParameter,  lightDiffuse);
 var squareSpecularProduct = mult(squareSpecularParameter, lightSpecular);

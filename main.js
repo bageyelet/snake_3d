@@ -190,20 +190,6 @@ function renderSnake() {
     }
 
     snakeList.next();
-    // while (el != null) {
-    //     switch(el.data.type) {
-    //         case SNAKEHEAD:
-                
-    //             break;
-    //         case SNAKEBODY:
-    //             renderObject(SNAKEBODY, [el.data.pos], el.data.angle);
-    //             break;
-    //         case SNAKETAIL:
-    //             renderObject(SNAKETAIL, [el.data.pos], el.data.angle);
-    //             break;
-    //     }
-    //     el = snakeList.next();
-    // }
 }
 
 // food has two components: the first is the vector of coordinates, the second is the angle

@@ -81,14 +81,14 @@ for (var i=0; i<lenParallelepipedArray/3; i++) {
 var parallelepiped_scalematrix = scalem(0.11,0.11,0.05);
 // **********************************************************************************
 var snakehead_vertices = [
-    vec4( 0.0 , 0.0 , 0.3 ),
-    vec4( 0.2 , 0.0 ,-0.1 ),
-    vec4( 0.0 , 0.2 ,-0.1 ),
-    vec4(-0.2 , 0.0 ,-0.1 ),
-    vec4(-0.15, 0.0 ,-0.3 ),
-    vec4(-0.08, 0.14,-0.3 ),
-    vec4( 0.08, 0.14,-0.3 ),
-    vec4( 0.15, 0.0 ,-0.3 )
+    vec4( 0.0 , 0.0 , 0.35 ),
+    vec4( 0.2 , 0.0 ,-0.05 ),
+    vec4( 0.0 , 0.2 ,-0.05 ),
+    vec4(-0.2 , 0.0 ,-0.05 ),
+    vec4(-0.15, 0.0 ,-0.35 ),
+    vec4(-0.08, 0.14,-0.35 ),
+    vec4( 0.08, 0.14,-0.35 ),
+    vec4( 0.15, 0.0 ,-0.35 )
 ];
 // gl.TRIANGLES
 var snakeheadArray = 
@@ -151,7 +151,7 @@ for (var i=0; i<lenSnakebodyArray/3; i++) {
       snakebodyNormalsArray.push(vec4(normalize(cross(t1,t2)), 0.0));
 }
 
-var snakebody_scalematrix = scalem(0.3,0.5,1.0);
+var snakebody_scalematrix = scalem(0.3,0.5,0.95);
 // **********************************************************************************
 var snaketail_vertices = [
     vec4(-0.18, 0.0 , 0.2 ),
