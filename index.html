@@ -4,13 +4,21 @@
 <script id="vs-env" type="x-shader/x-vertex">
 
 attribute  vec4 vPosition;
+attribute  vec4 vNormal;
 
 uniform mat4 modelViewMatrix;
 uniform mat4 projectionMatrix;
 uniform mat4 cameraMatrix;
 
+varying vec3 N, E;
+
 void main()
 {
+
+    vec4 pos = modelViewMatrix * vPosition;            // position in world coordinates
+    E = - normalize( (cameraMatrix * pos).xyz );       // vector from vertex to camera
+    N = normalize( (modelViewMatrix * vNormal).xyz);   // normal in world coordinates
+
     gl_Position = projectionMatrix * cameraMatrix * modelViewMatrix * vPosition;
 }
 </script>
@@ -18,11 +26,30 @@ void main()
 <script id="fs-env" type="x-shader/x-fragment">
 
 precision mediump float;
+
 uniform vec4 color;
+uniform vec4 diffuseProduct, specularProduct;
+uniform float shininess;
+
+varying vec3 N, E;
 
 void main()
 {
-    gl_FragColor = color;
+    vec4 dirLightDirection = vec4( 0.0, 2.0, -1.0, 0.0);
+    // vec4 diffuseDir = vec4( 0.6, 0.6, 0.6, 1.0 );
+    // vec4 specularDir = vec4( 0.2, 0.2, 0.2, 1.0 );
+
+    vec3 Ldir = normalize( dirLightDirection.xyz );
+    vec3 Hdir = normalize( Ldir + E );
+    float Kd = max( dot(Ldir, N), 0.0 );
+    vec4 diffuse = Kd*diffuseProduct;
+    float Ks = pow( max(dot(N, Hdir), 0.0), shininess );
+    vec4 specular = Ks * specularProduct;
+    if( dot(Ldir, N) < 0.0 ) {
+        specular = vec4(0.0, 0.0, 0.0, 0.0);
+    }
+    
+    gl_FragColor = 0.8*color + diffuse + specular;
 }
 </script>
 

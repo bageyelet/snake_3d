@@ -23,9 +23,11 @@ var up_eye  = vec3(0.0, 1.0 , 0.0);
 
 var cameraMatrix; var projectionMatrix;
 var vBuffer; var vPosition;
+var nBuffer; var vNormal;
 var buffer_indexes = {};
 var uColor;
 var uModelViewMatrix; var uProjectionMatrix; var uCameraMatrix;
+var uDiffuseProduct; var uSpecularProduct; var uShininess;
 
 function setCamera(eye, at, update_global) {
     // eye.delta_transl; eye.delta_angle;
@@ -64,7 +66,9 @@ function renderTile(modelViewMatrix) {
 function renderEnv() {
 
     gl.uniform4fv( uColor, PURPLE);
-
+    gl.uniform4fv( uDiffuseProduct, flatten(squareDiffuseProduct));
+    gl.uniform4fv( uSpecularProduct, flatten(squareSpecularProduct));
+    gl.uniform1f( uShininess, squareShininess);
     var scalematrix = scalem(tile_size_min,1.0,tile_size_min);
 
     for (var i=0; i<env_size_w; i++) {
@@ -80,6 +84,9 @@ function renderObject(type, positions, theta) {
         case PIRAMID:
 
             gl.uniform4fv( uColor, RED);
+            gl.uniform4fv( uDiffuseProduct, flatten(piramidDiffuseProduct));
+            gl.uniform4fv( uSpecularProduct, flatten(piramidSpecularProduct));
+            gl.uniform1f( uShininess, piramidShininess);
 
             for (var i=0; i<len; i++) {
                 var posX = positions[i][0]; var posY = positions[i][1];
@@ -93,6 +100,9 @@ function renderObject(type, positions, theta) {
         case PARALLELEPIPED:
 
             gl.uniform4fv( uColor, BLUE);
+            gl.uniform4fv( uDiffuseProduct, flatten(parallelepipedDiffuseProduct));
+            gl.uniform4fv( uSpecularProduct, flatten(parallelepipedSpecularProduct));
+            gl.uniform1f( uShininess, parallelepipedShininess);
 
             for (var i = 0; i < len; i++) {
                 var posX = positions[i][0]; var posY = positions[i][1];
@@ -106,6 +116,9 @@ function renderObject(type, positions, theta) {
         case SNAKEHEAD:
 
             gl.uniform4fv( uColor, GREEN);
+            gl.uniform4fv( uDiffuseProduct, flatten(snakeDiffuseProduct));
+            gl.uniform4fv( uSpecularProduct, flatten(snakeSpecularProduct));
+            gl.uniform1f( uShininess, snakeShininess);
 
             for (var i = 0; i < len; i++) {
                 var posX = positions[i][0]; var posY = positions[i][1];
@@ -119,10 +132,13 @@ function renderObject(type, positions, theta) {
         case SNAKEBODY:
 
             gl.uniform4fv( uColor, GREEN);
+            gl.uniform4fv( uDiffuseProduct, flatten(snakeDiffuseProduct));
+            gl.uniform4fv( uSpecularProduct, flatten(snakeSpecularProduct));
+            gl.uniform1f( uShininess, snakeShininess);
 
             for (var i = 0; i < len; i++) {
                 var posX = positions[i][0]; var posY = positions[i][1];
-                var rotationmatrix = rotate(theta, [0, 1, 0] );
+                var rotationmatrix = rotate(theta[i], [0, 1, 0] );
                 var translateMatrix = translate(tile_size_min/2 + tile_size_max*posX, 0.01, tile_size_min/2 + tile_size_max*posY);
                 var modelViewMatrix = mult(translateMatrix, mult(rotationmatrix, snakebody_scalematrix));
                 gl.uniformMatrix4fv(uModelViewMatrix, false, flatten(modelViewMatrix));
@@ -133,6 +149,9 @@ function renderObject(type, positions, theta) {
         case SNAKETAIL:
 
             gl.uniform4fv( uColor, GREEN);
+            gl.uniform4fv( uDiffuseProduct, flatten(snakeDiffuseProduct));
+            gl.uniform4fv( uSpecularProduct, flatten(snakeSpecularProduct));
+            gl.uniform1f( uShininess, snakeShininess);
 
             for (var i = 0; i < len; i++) {
                 var posX = positions[i][0]; var posY = positions[i][1];
@@ -150,20 +169,41 @@ function renderObject(type, positions, theta) {
 
 function renderSnake() {
     var el = snakeList.next();
-    while (el != null) {
-        switch(el.data.type) {
-            case SNAKEHEAD:
-                renderObject(SNAKEHEAD, [el.data.pos], el.data.angle);
-                break;
-            case SNAKEBODY:
-                renderObject(SNAKEBODY, [el.data.pos], el.data.angle);
-                break;
-            case SNAKETAIL:
-                renderObject(SNAKETAIL, [el.data.pos], el.data.angle);
-                break;
-        }
+    if (el.data.type == SNAKEHEAD) {
+        renderObject(SNAKEHEAD, [el.data.pos], el.data.angle);
+    } else {
+        throw "renderSnake(): snakeList in an invalid state";
+    }
+    el = snakeList.next();
+    var positions = []; var angles = [];
+    while(el.data.type == SNAKEBODY) {
+        positions.push(el.data.pos);
+        angles.push(el.data.angle);
         el = snakeList.next();
     }
+    renderObject(SNAKEBODY, positions, angles);
+
+    if (el.data.type == SNAKETAIL) {
+        renderObject(SNAKETAIL, [el.data.pos], el.data.angle);
+    } else {
+        throw "renderSnake(): snakeList in an invalid state";
+    }
+
+    snakeList.next();
+    // while (el != null) {
+    //     switch(el.data.type) {
+    //         case SNAKEHEAD:
+                
+    //             break;
+    //         case SNAKEBODY:
+    //             renderObject(SNAKEBODY, [el.data.pos], el.data.angle);
+    //             break;
+    //         case SNAKETAIL:
+    //             renderObject(SNAKETAIL, [el.data.pos], el.data.angle);
+    //             break;
+    //     }
+    //     el = snakeList.next();
+    // }
 }
 
 // food has two components: the first is the vector of coordinates, the second is the angle
@@ -220,6 +260,9 @@ window.onload = function init() {
     uProjectionMatrix = gl.getUniformLocation(program, "projectionMatrix");
     uCameraMatrix = gl.getUniformLocation(program, "cameraMatrix");
     uColor = gl.getUniformLocation(program, "color");
+    uDiffuseProduct  = gl.getUniformLocation(program, "diffuseProduct");
+    uSpecularProduct = gl.getUniformLocation(program, "specularProduct");
+    uShininess = gl.getUniformLocation(program, "shininess");
 
     gl.uniformMatrix4fv( uProjectionMatrix, false, flatten(projectionMatrix));
 
@@ -232,12 +275,22 @@ window.onload = function init() {
     vBuffer = gl.createBuffer();
     gl.bindBuffer( gl.ARRAY_BUFFER, vBuffer);
     gl.bufferData( gl.ARRAY_BUFFER, flatten(allVertices), gl.STATIC_DRAW );
-    buffer_indexes[SQUARE] = 0; buffer_indexes[PIRAMID] = 4; buffer_indexes[PARALLELEPIPED] = 22; 
-    buffer_indexes[SNAKEHEAD] = 58; buffer_indexes[SNAKEBODY] = 94; buffer_indexes[SNAKETAIL] = 130;
-
     vPosition = gl.getAttribLocation( program, "vPosition" );
     gl.vertexAttribPointer( vPosition, 4, gl.FLOAT, false, 0, 0 );
     gl.enableVertexAttribArray( vPosition );
+        
+    var allNormals = squareNormalsArray.concat(piramidNormalsArray).concat(parallelepipedNormalsArray).concat(snakeheadNormalsArray)
+                      .concat(snakebodyNormalsArray).concat(snaketailNormalsArray);
+
+    nBuffer = gl.createBuffer();
+    gl.bindBuffer( gl.ARRAY_BUFFER, nBuffer );
+    gl.bufferData( gl.ARRAY_BUFFER, flatten(allNormals), gl.STATIC_DRAW );
+    vNormal = gl.getAttribLocation( program, "vNormal" );
+    gl.vertexAttribPointer( vNormal, 4, gl.FLOAT, false, 0, 0 );
+    gl.enableVertexAttribArray( vNormal );
+
+    buffer_indexes[SQUARE] = 0; buffer_indexes[PIRAMID] = 4; buffer_indexes[PARALLELEPIPED] = 22; 
+    buffer_indexes[SNAKEHEAD] = 58; buffer_indexes[SNAKEBODY] = 94; buffer_indexes[SNAKETAIL] = 130;
 
     initializePositionUpdater();
 
@@ -596,7 +649,7 @@ function animation(type, curr) {
 
                     tot_tran.x += inc_tran.x;
                     tot_tran.y += inc_tran.y;
-                    
+
                     snake_head.pos[0] += inc_pos.x;
                     snake_head.pos[1] += inc_pos.y;
            
