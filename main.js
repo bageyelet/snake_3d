@@ -12,12 +12,11 @@ var poss;
 var food; var theta_food = 0;
 
 var environment;
-var curr_position = [Math.ceil(env_size_w/2), Math.ceil(env_size_h/2)];
 var snake_head;
 var snakeList = new List();
 var facing_direction = NORTH;
-var angle_head = 0;
 
+var curr_position = [Math.ceil(env_size_w/2), Math.ceil(env_size_h/2)];
 var at_eye  = vec3(curr_position[0]*tile_size_max + tile_size_min/2, 0.0 , curr_position[1]*tile_size_max + tile_size_min/2);
 var eye_pos = vec3(at_eye[0], 1.25, at_eye[2]-2.0);
 var up_eye  = vec3(0.0, 1.0 , 0.0);
@@ -272,7 +271,6 @@ window.onload = function init() {
     snakeList.add(snake_head);
 
     renderEnv();
-    // renderEnvObjects(poss, [food, 0], [curr_position, angle_head]);
     renderEnvObjects(poss, [food, 0]);
 
     bindButtons();
@@ -289,48 +287,37 @@ var inc_rot=0;
 var tot_rot=0;
 
 var inc_pos={x:0, y:0};
-var tot_pos={x:0, y:0};
-var old_pos;
 
 function animation(type, curr) {
     switch(type) {
         case ROTATION_LEFT:
             if (curr == 0) {
-                old_pos = curr_position.slice();
                 initializeOldPos(snakeList.head);
                 snake_head.anim = ROTATION_LEFT;
-                switch (facing_direction) {
+                switch (snake_head.old_direction) {
                     case NORTH:
-                        facing_direction = WEST;
                         snake_head.direction = WEST;
-                        curr_position[0] += 1;
                         inc_pos.x = linear_interpolation(speed, 0, max_curr, 0, 1);
                         inc_pos.y = 0;
                         inc_tran.x = linear_interpolation(speed, 0, max_curr, 0, tile_size_max);
                         inc_tran.y = 0;
                         break;
                     case SOUTH:
-                        facing_direction = EAST;
                         snake_head.direction = EAST;
-                        curr_position[0] -= 1;
                         inc_pos.x = -linear_interpolation(speed, 0, max_curr, 0, 1);
                         inc_pos.y = 0;
                         inc_tran.x = -linear_interpolation(speed, 0, max_curr, 0, tile_size_max);
                         inc_tran.y = 0;
                         break;
                     case EAST:
-                        facing_direction = NORTH;
                         snake_head.direction = NORTH;
-                        curr_position[1] += 1;
                         inc_pos.x = 0;
                         inc_pos.y = linear_interpolation(speed, 0, max_curr, 0, 1);
                         inc_tran.x = 0;
                         inc_tran.y = linear_interpolation(speed, 0, max_curr, 0, tile_size_max);
                         break;
                     case WEST:
-                        facing_direction = SOUTH;
                         snake_head.direction = SOUTH;
-                        curr_position[1] -= 1;
                         inc_pos.x = 0;
                         inc_pos.y = -linear_interpolation(speed, 0, max_curr, 0, 1);
                         inc_tran.x = 0;
@@ -341,13 +328,13 @@ function animation(type, curr) {
                 }
 
                 inc_rot = linear_interpolation(speed, 0, max_curr, 0, 90);
-                tot_pos.x=0; tot_pos.y=0; tot_tran.x=0; tot_tran.y=0; tot_rot=0;
+                tot_tran.x=0; tot_tran.y=0; tot_rot=0;
 
             }
             if (curr >= max_curr) {
                 gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-                angle_head = fix_round_error(angle_head, 90)%360;
+                snake_head.angle = fix_round_error(snake_head.angle, 90)%360;
 
                 var eye={};
                 eye.delta_transl = [NaN, 0.0, NaN];
@@ -378,9 +365,7 @@ function animation(type, curr) {
 
                 renderEnv();
                 theta_food = (theta_food + 1) % 360;
-                // renderEnvObjects(poss, [food, theta_food], [curr_position, angle_head]);
-                snake_head.pos = curr_position;
-                snake_head.angle = angle_head;
+                snake_head.pos = [snake_head.old_pos[0] + 1*sign(inc_tran.x), snake_head.old_pos[1] + 1*sign(inc_tran.y)];
                 updateSnakePositions(snakeList.getSecond(), curr);
                 renderEnvObjects(poss, [food, theta_food]);
 
@@ -398,20 +383,16 @@ function animation(type, curr) {
                 setCamera(eye, at, false);
                 renderEnv();
                 theta_food = (theta_food + 1) % 360;
-                // renderEnvObjects(poss, [food, theta_food], [[old_pos[0]+tot_pos.x, old_pos[1]+tot_pos.y], angle_head]);
-                snake_head.pos = [old_pos[0]+tot_pos.x, old_pos[1]+tot_pos.y];
-                snake_head.angle = angle_head;
                 updateSnakePositions(snakeList.getSecond(), curr);
                 renderEnvObjects(poss, [food, theta_food]);
 
-
-                angle_head += inc_rot;
                 tot_rot    += inc_rot;
-
                 tot_tran.x += inc_tran.x;
                 tot_tran.y += inc_tran.y;
-                tot_pos.x  += inc_pos.x;
-                tot_pos.y  += inc_pos.y;
+
+                snake_head.pos[0] += inc_pos.x;
+                snake_head.pos[1] += inc_pos.y;
+                snake_head.angle += inc_rot;
 
                 window.requestAnimationFrame(function() {
                     animation(ROTATION_LEFT, curr+speed);
@@ -421,41 +402,32 @@ function animation(type, curr) {
             break;
         case ROTATION_RIGHT:
             if (curr == 0) {
-                old_pos = curr_position.slice();
                 initializeOldPos(snakeList.head);
                 snake_head.anim = ROTATION_RIGHT;
-                switch (facing_direction) {
+                switch (snake_head.old_direction) {
                     case NORTH:
-                        facing_direction = EAST;
                         snake_head.direction = EAST;
-                        curr_position[0] -= 1;
                         inc_pos.x = -linear_interpolation(speed, 0, max_curr, 0, 1);
                         inc_pos.y = 0;
                         inc_tran.x = -linear_interpolation(speed, 0, max_curr, 0, tile_size_max);
                         inc_tran.y = 0;
                         break;
                     case SOUTH:
-                        facing_direction = WEST;
                         snake_head.direction = WEST;
-                        curr_position[0] += 1;
                         inc_pos.x = linear_interpolation(speed, 0, max_curr, 0, 1);
                         inc_pos.y = 0;
                         inc_tran.x = linear_interpolation(speed, 0, max_curr, 0, tile_size_max);
                         inc_tran.y = 0;
                         break;
                     case EAST:
-                        facing_direction = SOUTH;
                         snake_head.direction = SOUTH;
-                        curr_position[1] -= 1;
                         inc_pos.x = 0;
                         inc_pos.y = -linear_interpolation(speed, 0, max_curr, 0, 1);
                         inc_tran.x = 0;
                         inc_tran.y = -linear_interpolation(speed, 0, max_curr, 0, tile_size_max);
                         break;
                     case WEST:
-                        facing_direction = NORTH;
                         snake_head.direction = NORTH;
-                        curr_position[1] += 1;
                         inc_pos.x = 0;
                         inc_pos.y = linear_interpolation(speed, 0, max_curr, 0, 1);
                         inc_tran.x = 0;
@@ -466,13 +438,13 @@ function animation(type, curr) {
                 }
 
                 inc_rot = -linear_interpolation(speed, 0, max_curr, 0, 90);
-                tot_pos.x=0; tot_pos.y=0; tot_tran.x=0; tot_tran.y=0; tot_rot=0;
+                tot_tran.x=0; tot_tran.y=0; tot_rot=0;
 
             } 
             if (curr >= max_curr) {
                 gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-                angle_head = fix_round_error(angle_head, 90)%360;
+                snake_head.angle = fix_round_error(snake_head.angle, 90)%360;
 
                 var eye={};
                 eye.delta_transl = [NaN, 0.0, NaN];
@@ -502,9 +474,7 @@ function animation(type, curr) {
                 setCamera(eye, at, true);
                 renderEnv();
                 theta_food = (theta_food + 1) % 360;
-                // renderEnvObjects(poss, [food, theta_food], [curr_position, angle_head]);
-                snake_head.pos = curr_position;
-                snake_head.angle = angle_head;
+                snake_head.pos = [snake_head.old_pos[0] + 1*sign(inc_tran.x), snake_head.old_pos[1] + 1*sign(inc_tran.y)];
                 updateSnakePositions(snakeList.getSecond(), curr);
                 renderEnvObjects(poss, [food, theta_food]);
 
@@ -522,19 +492,16 @@ function animation(type, curr) {
                 setCamera(eye, at, false);
                 renderEnv();
                 theta_food = (theta_food + 1) % 360;
-                //renderEnvObjects(poss, [food, theta_food], [[old_pos[0]+tot_pos.x, old_pos[1]+tot_pos.y], angle_head]);
-                snake_head.pos = [old_pos[0]+tot_pos.x, old_pos[1]+tot_pos.y];
-                snake_head.angle = angle_head;
                 updateSnakePositions(snakeList.getSecond(), curr);
                 renderEnvObjects(poss, [food, theta_food]);
 
-                angle_head += inc_rot;
                 tot_rot    += inc_rot;
-
                 tot_tran.x += inc_tran.x;
                 tot_tran.y += inc_tran.y;
-                tot_pos.x  += inc_pos.x;
-                tot_pos.y  += inc_pos.y;
+
+                snake_head.pos[0] += inc_pos.x;
+                snake_head.pos[1] += inc_pos.y;
+                snake_head.angle += inc_rot;
 
             window.requestAnimationFrame(function() {
                 animation(ROTATION_RIGHT, curr+speed);
@@ -544,42 +511,37 @@ function animation(type, curr) {
             break;
         case FORWARD:
                 if (curr == 0) {
-                    old_pos = curr_position.slice();
                     initializeOldPos(snakeList.head);
                     snake_head.anim = FORWARD;
-                    switch (facing_direction) {
+                    switch (snake_head.old_direction) {
                         case WEST:
                             inc_pos.x = linear_interpolation(speed, 0, max_curr/2, 0, 1);
                             inc_pos.y = 0;
                             inc_tran.x = linear_interpolation(speed, 0, max_curr/2, 0, tile_size_max);
                             inc_tran.y = 0;
-                            curr_position[0] += 1;
                             break;
                         case EAST:
                             inc_pos.x = -linear_interpolation(speed, 0, max_curr/2, 0, 1);
                             inc_pos.y = 0;
                             inc_tran.x = -linear_interpolation(speed, 0, max_curr/2, 0, tile_size_max);
                             inc_tran.y = 0;
-                            curr_position[0] -= 1;
                             break;
                         case NORTH:
                             inc_pos.x = 0;
                             inc_pos.y = linear_interpolation(speed, 0, max_curr/2, 0, 1);
                             inc_tran.x = 0;
                             inc_tran.y = linear_interpolation(speed, 0, max_curr/2, 0, tile_size_max);
-                            curr_position[1] += 1;
                             break;
                         case SOUTH:
                             inc_pos.x = 0;
                             inc_pos.y = -linear_interpolation(speed, 0, max_curr/2, 0, 1);
                             inc_tran.x = 0;
                             inc_tran.y = -linear_interpolation(speed, 0, max_curr/2, 0, tile_size_max);
-                            curr_position[1] -= 1;
                             break;
                         default:
                             throw "animation(): facing_direction corrupted";
                     }
-                    tot_pos.x=0; tot_pos.y=0; tot_tran.x=0; tot_tran.y=0;
+                    tot_tran.x=0; tot_tran.y=0;
                 }
                 if (curr >= max_curr) {
                     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -612,8 +574,7 @@ function animation(type, curr) {
                     setCamera(eye, at, true);
                     renderEnv();
                     theta_food = (theta_food + 1) % 360;
-                    //renderEnvObjects(poss, [food, theta_food], [[old_pos[0]+tot_pos.x, old_pos[1]+tot_pos.y], angle_head]);
-                    snake_head.pos = [old_pos[0]+tot_pos.x, old_pos[1]+tot_pos.y];
+                    snake_head.pos = [snake_head.old_pos[0] + 1*sign(inc_tran.x), snake_head.old_pos[1] + 1*sign(inc_tran.y)];
                     updateSnakePositions(snakeList.getSecond(), curr);
                     renderEnvObjects(poss, [food, theta_food]);
                     window.requestAnimationFrame(render);
@@ -630,15 +591,14 @@ function animation(type, curr) {
                     setCamera(eye, at, false);
                     renderEnv();
                     theta_food = (theta_food + 1) % 360;
-                    //renderEnvObjects(poss, [food, theta_food], [[old_pos[0]+tot_pos.x, old_pos[1]+tot_pos.y], angle_head]);
-                    snake_head.pos = [old_pos[0]+tot_pos.x, old_pos[1]+tot_pos.y];
                     updateSnakePositions(snakeList.getSecond(), curr);
                     renderEnvObjects(poss, [food, theta_food]);
 
                     tot_tran.x += inc_tran.x;
                     tot_tran.y += inc_tran.y;
-                    tot_pos.x  += inc_pos.x;
-                    tot_pos.y  += inc_pos.y;
+                    
+                    snake_head.pos[0] += inc_pos.x;
+                    snake_head.pos[1] += inc_pos.y;
            
                     window.requestAnimationFrame(function() {
                         animation(FORWARD, curr+2*speed);
@@ -671,7 +631,7 @@ function render() {
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     renderEnv();
     theta_food = (theta_food + 1) % 360;
-    renderEnvObjects(poss, [food, theta_food], [curr_position, angle_head]);
+    renderEnvObjects(poss, [food, theta_food]);
 
     window.requestAnimationFrame(render);
 }

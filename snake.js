@@ -119,7 +119,8 @@ function updateFirstBodyPosition(snake_node, i) {
                         snake_node.data.pos[0] = snake_node.data.old_pos[0] - straigthenArray[i][0][1];
                         snake_node.data.pos[1] = snake_node.data.old_pos[1] + straigthenArray[i][0][0];
                         snake_node.data.angle = snake_node.data.old_angle + straigthenArray[i][1];
-                    } else if (snake_node.data.old_anim == ROTATION_RIGHT_BODY || snake_node.data.old_anim == FURTHER_ROTATION_RIGHT) {
+                    } else if (snake_node.data.old_anim == ROTATION_RIGHT_BODY || snake_node.data.old_anim == FURTHER_ROTATION_RIGHT || 
+                                snake_node.data.old_anim == FURTHER_ROTATION2_RIGHT) {
                         snake_node.data.anim = COMPLETING_ROTATION_RIGHT_BODY;
                         snake_node.data.direction = NORTH;
                         snake_node.data.pos[0] = snake_node.data.old_pos[0] + straigthenArray[i][0][1];
@@ -142,7 +143,8 @@ function updateFirstBodyPosition(snake_node, i) {
                         snake_node.data.pos[0] = snake_node.data.old_pos[0] + straigthenArray[i][0][1];
                         snake_node.data.pos[1] = snake_node.data.old_pos[1] - straigthenArray[i][0][0];
                         snake_node.data.angle = snake_node.data.old_angle + straigthenArray[i][1];
-                    } else if (snake_node.data.old_anim == ROTATION_RIGHT_BODY || snake_node.data.old_anim == FURTHER_ROTATION_RIGHT) {
+                    } else if (snake_node.data.old_anim == ROTATION_RIGHT_BODY || snake_node.data.old_anim == FURTHER_ROTATION_RIGHT || 
+                                snake_node.data.old_anim == FURTHER_ROTATION2_RIGHT) {
                         snake_node.data.anim = COMPLETING_ROTATION_RIGHT_BODY;
                         snake_node.data.direction = SOUTH;
                         snake_node.data.pos[0] = snake_node.data.old_pos[0] - straigthenArray[i][0][1];
@@ -165,7 +167,8 @@ function updateFirstBodyPosition(snake_node, i) {
                         snake_node.data.pos[0] = snake_node.data.old_pos[0] - straigthenArray[i][0][0];
                         snake_node.data.pos[1] = snake_node.data.old_pos[1] - straigthenArray[i][0][1];
                         snake_node.data.angle = snake_node.data.old_angle + straigthenArray[i][1];
-                    } else if (snake_node.data.old_anim == ROTATION_RIGHT_BODY || snake_node.data.old_anim == FURTHER_ROTATION_RIGHT) {
+                    } else if (snake_node.data.old_anim == ROTATION_RIGHT_BODY || snake_node.data.old_anim == FURTHER_ROTATION_RIGHT || 
+                                snake_node.data.old_anim == FURTHER_ROTATION2_RIGHT) {
                         snake_node.data.anim = COMPLETING_ROTATION_RIGHT_BODY;
                         snake_node.data.direction = EAST;
                         snake_node.data.pos[0] = snake_node.data.old_pos[0] - straigthenArray[i][0][0];
@@ -188,7 +191,8 @@ function updateFirstBodyPosition(snake_node, i) {
                         snake_node.data.pos[0] = snake_node.data.old_pos[0] + straigthenArray[i][0][0];
                         snake_node.data.pos[1] = snake_node.data.old_pos[1] + straigthenArray[i][0][1];
                         snake_node.data.angle = snake_node.data.old_angle + straigthenArray[i][1];
-                    } else if (snake_node.data.old_anim == ROTATION_RIGHT_BODY || snake_node.data.old_anim == FURTHER_ROTATION_RIGHT) {
+                    } else if (snake_node.data.old_anim == ROTATION_RIGHT_BODY || snake_node.data.old_anim == FURTHER_ROTATION_RIGHT || 
+                                snake_node.data.old_anim == FURTHER_ROTATION2_RIGHT) {
                         snake_node.data.anim = COMPLETING_ROTATION_RIGHT_BODY;
                         snake_node.data.direction = WEST;
                         snake_node.data.pos[0] = snake_node.data.old_pos[0] + straigthenArray[i][0][0];
@@ -206,12 +210,14 @@ function updateFirstBodyPosition(snake_node, i) {
             switch (snake_node.prev.data.direction) {
                 case NORTH:
                     snake_node.data.direction = EAST;
-                    if (snake_node.data.old_anim == ROTATION_LEFT_BODY) {
+                    if (snake_node.data.old_anim == ROTATION_LEFT_BODY || snake_node.data.old_anim == FURTHER_ROTATION_LEFT || snake_node.data.old_anim ==
+                                 FURTHER_ROTATION2_LEFT) {
                         snake_node.data.anim = FURTHER_ROTATION_LEFT;
                         snake_node.data.pos[0] = snake_node.data.old_pos[0] - furtherRotationArray[i][0][0];
                         snake_node.data.pos[1] = snake_node.data.old_pos[1] + furtherRotationArray[i][0][1];
                         snake_node.data.angle = snake_node.data.old_angle + furtherRotationArray[i][1];
-                    } else if (snake_node.data.old_anim == ROTATION_RIGHT_BODY || snake_node.data.old_anim == FURTHER_ROTATION_RIGHT) {
+                    } else if (snake_node.data.old_anim == ROTATION_RIGHT_BODY || snake_node.data.old_anim == FURTHER_ROTATION_RIGHT || snake_node.data.
+                                old_anim == FURTHER_ROTATION2_RIGHT) {
                         snake_node.data.anim = FURTHER_ROTATION2_LEFT;
                         snake_node.data.pos[0] = snake_node.data.old_pos[0] - furtherRotation2Array[i][0][0];
                         snake_node.data.pos[1] = snake_node.data.old_pos[1] + furtherRotation2Array[i][0][1];
@@ -225,12 +231,14 @@ function updateFirstBodyPosition(snake_node, i) {
                     break;
                 case WEST:
                     snake_node.data.direction = NORTH;
-                    if (snake_node.data.old_anim == ROTATION_LEFT_BODY) {
+                    if (snake_node.data.old_anim == ROTATION_LEFT_BODY || snake_node.data.old_anim == FURTHER_ROTATION_LEFT || snake_node.data.old_anim ==
+                                 FURTHER_ROTATION2_LEFT) {
                         snake_node.data.anim = FURTHER_ROTATION_LEFT;
                         snake_node.data.pos[0] = snake_node.data.old_pos[0] + furtherRotationArray[i][0][1];
                         snake_node.data.pos[1] = snake_node.data.old_pos[1] + furtherRotationArray[i][0][0];
                         snake_node.data.angle = snake_node.data.old_angle + furtherRotationArray[i][1];
-                    } else if (snake_node.data.old_anim == ROTATION_RIGHT_BODY || snake_node.data.old_anim == FURTHER_ROTATION_RIGHT) {
+                    } else if (snake_node.data.old_anim == ROTATION_RIGHT_BODY || snake_node.data.old_anim == FURTHER_ROTATION_RIGHT || snake_node.data.
+                                old_anim == FURTHER_ROTATION2_RIGHT) {
                         snake_node.data.anim = FURTHER_ROTATION2_LEFT;
                         snake_node.data.pos[0] = snake_node.data.old_pos[0] + furtherRotation2Array[i][0][1];
                         snake_node.data.pos[1] = snake_node.data.old_pos[1] + furtherRotation2Array[i][0][0];
@@ -244,12 +252,14 @@ function updateFirstBodyPosition(snake_node, i) {
                     break;
                 case EAST:
                     snake_node.data.direction = SOUTH;
-                    if (snake_node.data.old_anim == ROTATION_LEFT_BODY) {
+                    if (snake_node.data.old_anim == ROTATION_LEFT_BODY || snake_node.data.old_anim == FURTHER_ROTATION_LEFT || snake_node.data.old_anim == 
+                                    FURTHER_ROTATION2_LEFT) {
                         snake_node.data.anim = FURTHER_ROTATION_LEFT;
                         snake_node.data.pos[0] = snake_node.data.old_pos[0] - furtherRotationArray[i][0][1];
                         snake_node.data.pos[1] = snake_node.data.old_pos[1] - furtherRotationArray[i][0][0];
                         snake_node.data.angle = snake_node.data.old_angle + furtherRotationArray[i][1];
-                    } else if (snake_node.data.old_anim == ROTATION_RIGHT_BODY || snake_node.data.old_anim == FURTHER_ROTATION_RIGHT) {
+                    } else if (snake_node.data.old_anim == ROTATION_RIGHT_BODY || snake_node.data.old_anim == FURTHER_ROTATION_RIGHT || snake_node.data.
+                                old_anim == FURTHER_ROTATION2_RIGHT) {
                         snake_node.data.anim = FURTHER_ROTATION2_LEFT;
                         snake_node.data.pos[0] = snake_node.data.old_pos[0] - furtherRotation2Array[i][0][1];
                         snake_node.data.pos[1] = snake_node.data.old_pos[1] - furtherRotation2Array[i][0][0];
@@ -263,12 +273,14 @@ function updateFirstBodyPosition(snake_node, i) {
                     break;
                 case SOUTH:
                     snake_node.data.direction = WEST;
-                    if (snake_node.data.old_anim == ROTATION_LEFT_BODY) {
+                    if (snake_node.data.old_anim == ROTATION_LEFT_BODY || snake_node.data.old_anim == FURTHER_ROTATION_LEFT || snake_node.data.old_anim == 
+                                    FURTHER_ROTATION2_LEFT) {
                         snake_node.data.anim = FURTHER_ROTATION_LEFT;
                         snake_node.data.pos[0] = snake_node.data.old_pos[0] + furtherRotationArray[i][0][0];
                         snake_node.data.pos[1] = snake_node.data.old_pos[1] - furtherRotationArray[i][0][1];
                         snake_node.data.angle = snake_node.data.old_angle + furtherRotationArray[i][1];
-                    } else if (snake_node.data.old_anim == ROTATION_RIGHT_BODY || snake_node.data.old_anim == FURTHER_ROTATION_RIGHT) {
+                    } else if (snake_node.data.old_anim == ROTATION_RIGHT_BODY || snake_node.data.old_anim == FURTHER_ROTATION_RIGHT || snake_node.data.
+                                old_anim == FURTHER_ROTATION2_RIGHT) {
                         snake_node.data.anim = FURTHER_ROTATION2_LEFT;
                         snake_node.data.pos[0] = snake_node.data.old_pos[0] + furtherRotation2Array[i][0][0];
                         snake_node.data.pos[1] = snake_node.data.old_pos[1] - furtherRotation2Array[i][0][1];
@@ -286,11 +298,17 @@ function updateFirstBodyPosition(snake_node, i) {
             switch (snake_node.prev.data.direction) {
                 case NORTH:
                     snake_node.data.direction = WEST;
-                    if (snake_node.data.old_anim == ROTATION_RIGHT_BODY) {
+                    if (snake_node.data.old_anim == ROTATION_RIGHT_BODY || snake_node.data.old_anim == FURTHER_ROTATION_RIGHT || snake_node.data.old_anim == FURTHER_ROTATION2_RIGHT) {
                         snake_node.data.anim = FURTHER_ROTATION_RIGHT;
                         snake_node.data.pos[0] = snake_node.data.old_pos[0] + furtherRotationArray[i][0][0];
                         snake_node.data.pos[1] = snake_node.data.old_pos[1] + furtherRotationArray[i][0][1];
                         snake_node.data.angle = snake_node.data.old_angle - furtherRotationArray[i][1];
+                    } else if (snake_node.data.old_anim == ROTATION_LEFT_BODY || snake_node.data.old_anim == FURTHER_ROTATION_LEFT || snake_node.data.
+                                old_anim == FURTHER_ROTATION2_LEFT) {
+                        snake_node.data.anim = FURTHER_ROTATION2_RIGHT;
+                        snake_node.data.pos[0] = snake_node.data.old_pos[0] + furtherRotation2Array[i][0][0];
+                        snake_node.data.pos[1] = snake_node.data.old_pos[1] + furtherRotation2Array[i][0][1];
+                        snake_node.data.angle = snake_node.data.old_angle - furtherRotation2Array[i][1];
                     } else {
                         snake_node.data.anim = ROTATION_RIGHT_BODY;
                         snake_node.data.pos[0] = snake_node.data.old_pos[0] + forwardRotationArray[i][0][0];
@@ -300,11 +318,17 @@ function updateFirstBodyPosition(snake_node, i) {
                     break;
                 case WEST:
                     snake_node.data.direction = SOUTH;
-                    if (snake_node.data.old_anim == ROTATION_RIGHT_BODY) {
+                    if (snake_node.data.old_anim == ROTATION_RIGHT_BODY || snake_node.data.old_anim == FURTHER_ROTATION_RIGHT || snake_node.data.old_anim == FURTHER_ROTATION2_RIGHT) {
                         snake_node.data.anim = FURTHER_ROTATION_RIGHT;
                         snake_node.data.pos[0] = snake_node.data.old_pos[0] + furtherRotationArray[i][0][1];
                         snake_node.data.pos[1] = snake_node.data.old_pos[1] - furtherRotationArray[i][0][0];
                         snake_node.data.angle = snake_node.data.old_angle - furtherRotationArray[i][1];
+                    } else if (snake_node.data.old_anim == ROTATION_LEFT_BODY || snake_node.data.old_anim == FURTHER_ROTATION_LEFT || snake_node.data.
+                                old_anim == FURTHER_ROTATION2_LEFT) {
+                        snake_node.data.anim = FURTHER_ROTATION2_RIGHT;
+                        snake_node.data.pos[0] = snake_node.data.old_pos[0] + furtherRotation2Array[i][0][1];
+                        snake_node.data.pos[1] = snake_node.data.old_pos[1] - furtherRotation2Array[i][0][0];
+                        snake_node.data.angle = snake_node.data.old_angle - furtherRotation2Array[i][1];
                     } else {
                         snake_node.data.anim = ROTATION_RIGHT_BODY;
                         snake_node.data.pos[0] = snake_node.data.old_pos[0] + forwardRotationArray[i][0][1];
@@ -314,11 +338,17 @@ function updateFirstBodyPosition(snake_node, i) {
                     break;
                 case EAST:
                     snake_node.data.direction = NORTH;
-                    if (snake_node.data.old_anim == ROTATION_RIGHT_BODY) {
+                    if (snake_node.data.old_anim == ROTATION_RIGHT_BODY || snake_node.data.old_anim == FURTHER_ROTATION_RIGHT || snake_node.data.old_anim == FURTHER_ROTATION2_RIGHT) {
                         snake_node.data.anim = FURTHER_ROTATION_RIGHT;
                         snake_node.data.pos[0] = snake_node.data.old_pos[0] - furtherRotationArray[i][0][1];
                         snake_node.data.pos[1] = snake_node.data.old_pos[1] + furtherRotationArray[i][0][0];
                         snake_node.data.angle = snake_node.data.old_angle - furtherRotationArray[i][1];
+                    } else if (snake_node.data.old_anim == ROTATION_LEFT_BODY || snake_node.data.old_anim == FURTHER_ROTATION_LEFT || snake_node.data.
+                                old_anim == FURTHER_ROTATION2_LEFT) {
+                        snake_node.data.anim = FURTHER_ROTATION2_RIGHT;
+                        snake_node.data.pos[0] = snake_node.data.old_pos[0] - furtherRotation2Array[i][0][1];
+                        snake_node.data.pos[1] = snake_node.data.old_pos[1] + furtherRotation2Array[i][0][0];
+                        snake_node.data.angle = snake_node.data.old_angle - furtherRotation2Array[i][1];
                     } else {
                         snake_node.data.anim = ROTATION_RIGHT_BODY;
                         snake_node.data.pos[0] = snake_node.data.old_pos[0] - forwardRotationArray[i][0][1];
@@ -328,11 +358,17 @@ function updateFirstBodyPosition(snake_node, i) {
                     break;
                 case SOUTH:
                     snake_node.data.direction = EAST;
-                    if (snake_node.data.old_anim == ROTATION_RIGHT_BODY) {
+                    if (snake_node.data.old_anim == ROTATION_RIGHT_BODY || snake_node.data.old_anim == FURTHER_ROTATION_RIGHT || snake_node.data.old_anim == FURTHER_ROTATION2_RIGHT) {
                         snake_node.data.anim = FURTHER_ROTATION_RIGHT;
                         snake_node.data.pos[0] = snake_node.data.old_pos[0] - furtherRotationArray[i][0][0];
                         snake_node.data.pos[1] = snake_node.data.old_pos[1] - furtherRotationArray[i][0][1];
                         snake_node.data.angle = snake_node.data.old_angle - furtherRotationArray[i][1];
+                    } else if (snake_node.data.old_anim == ROTATION_LEFT_BODY || snake_node.data.old_anim == FURTHER_ROTATION_LEFT || snake_node.data.
+                                old_anim == FURTHER_ROTATION2_LEFT) {
+                        snake_node.data.anim = FURTHER_ROTATION2_RIGHT;
+                        snake_node.data.pos[0] = snake_node.data.old_pos[0] - furtherRotation2Array[i][0][0];
+                        snake_node.data.pos[1] = snake_node.data.old_pos[1] - furtherRotation2Array[i][0][1];
+                        snake_node.data.angle = snake_node.data.old_angle - furtherRotation2Array[i][1];
                     } else {
                         snake_node.data.anim = ROTATION_RIGHT_BODY;
                         snake_node.data.pos[0] = snake_node.data.old_pos[0] - forwardRotationArray[i][0][0];
@@ -606,6 +642,38 @@ function updateSnakePositions(snake_node, i) {
                         snake_node.data.pos[0] = snake_node.data.old_pos[0] + furtherRotation2Array[i][0][1];
                         snake_node.data.pos[1] = snake_node.data.old_pos[1] + furtherRotation2Array[i][0][0];
                         snake_node.data.angle = snake_node.data.old_angle + furtherRotation2Array[i][1];
+                        break;
+                }
+                break;
+            case FURTHER_ROTATION2_RIGHT:
+                switch (prev.data.old_direction) {
+                    case SOUTH:
+                        snake_node.data.direction = SOUTH;
+                        snake_node.data.anim = FURTHER_ROTATION2_RIGHT;
+                        snake_node.data.pos[0] = snake_node.data.old_pos[0] + furtherRotation2Array[i][0][1];
+                        snake_node.data.pos[1] = snake_node.data.old_pos[1] - furtherRotation2Array[i][0][0];
+                        snake_node.data.angle = snake_node.data.old_angle - furtherRotation2Array[i][1];
+                        break;
+                    case WEST:
+                        snake_node.data.direction = WEST;
+                        snake_node.data.anim = FURTHER_ROTATION2_RIGHT;
+                        snake_node.data.pos[0] = snake_node.data.old_pos[0] + furtherRotation2Array[i][0][0];
+                        snake_node.data.pos[1] = snake_node.data.old_pos[1] + furtherRotation2Array[i][0][1];
+                        snake_node.data.angle = snake_node.data.old_angle - furtherRotation2Array[i][1];
+                        break;
+                    case EAST:
+                        snake_node.data.direction = EAST;
+                        snake_node.data.anim = FURTHER_ROTATION2_RIGHT;
+                        snake_node.data.pos[0] = snake_node.data.old_pos[0] - furtherRotation2Array[i][0][0];
+                        snake_node.data.pos[1] = snake_node.data.old_pos[1] - furtherRotation2Array[i][0][1];
+                        snake_node.data.angle = snake_node.data.old_angle - furtherRotation2Array[i][1];
+                        break;
+                    case NORTH:
+                        snake_node.data.direction = NORTH;
+                        snake_node.data.anim = FURTHER_ROTATION2_RIGHT;
+                        snake_node.data.pos[0] = snake_node.data.old_pos[0] - furtherRotation2Array[i][0][1];
+                        snake_node.data.pos[1] = snake_node.data.old_pos[1] + furtherRotation2Array[i][0][0];
+                        snake_node.data.angle = snake_node.data.old_angle - furtherRotation2Array[i][1];
                         break;
                 }
                 break;

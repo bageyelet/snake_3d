@@ -98,6 +98,12 @@ function fix_round_error(val, mult) {
     return mult*tmp;
 }
 
+function sign(val) {
+    if (val > 0) return +1;
+    else if (val == 0) return 0;
+    else return -1;
+}
+
 function build_env(env_w, env_h) {
     var ris = [];
     for (var i=0; i<env_w; i++) {
