@@ -42,8 +42,8 @@ var WEST  = 23;
 var max_curr=200; var speed=10;
 
 // light stuff
-var lightDiffuse  = vec4( 0.8, 0.8, 0.8, 1.0 );
-var lightSpecular = vec4( 0.8, 0.8, 0.8, 1.0 );
+var lightDiffuse  = vec4( 1.0, 1.0, 1.0, 1.0 );
+var lightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
 
 var parallelepipedDiffuseParameter  = vec4( 0.8, 0.8, 0.6, 1.0 );
 var parallelepipedSpecularParameter = vec4( 0.6, 0.6, 0.2, 1.0 );
@@ -51,14 +51,14 @@ var parallelepipedShininess = 500.0;
 var parallelepipedDiffuseProduct  = mult(parallelepipedDiffuseParameter,  lightSpecular);
 var parallelepipedSpecularProduct = mult(parallelepipedSpecularParameter, lightSpecular);
 
-var piramidDiffuseParameter  = vec4( 1.0, 1.0, 1.0, 1.0 );
-var piramidSpecularParameter = vec4( 1.0, 1.0, 1.0, 1.0 );
-var piramidShininess = 500.0;
+var piramidDiffuseParameter  = vec4( 0.5, 0.5, 0.5, 1.0 );
+var piramidSpecularParameter = vec4( 0.8, 0.8, 0.8, 1.0 );
+var piramidShininess = 20.0;
 var piramidDiffuseProduct  = mult(piramidDiffuseParameter,  lightDiffuse);
 var piramidSpecularProduct = mult(piramidSpecularParameter, lightSpecular);
 
-var squareDiffuseParameter  = vec4( 0.2, 0.1, 0.2, 0.2 );
-var squareSpecularParameter = vec4( 0.5, 0.2, 0.5, 0.5 );
+var squareDiffuseParameter  = vec4( 0.8, 0.8, 0.8, 1.0 );
+var squareSpecularParameter = vec4( 0.5, 0.5, 0.5, 1.0 );
 var squareShininess = 20.0;
 var squareDiffuseProduct  = mult(squareDiffuseParameter,  lightDiffuse);
 var squareSpecularProduct = mult(squareSpecularParameter, lightSpecular);
@@ -70,5 +70,8 @@ var snakeDiffuseProduct  = mult(snakeDiffuseParameter, lightDiffuse);
 var snakeSpecularProduct = mult(snakeSpecularParameter, lightSpecular);
 
 // textures
-var BLUE_ENV_TEXTURES  = 0;
-var GREEN_ENV_TEXTURES = 1;
+var WHITE_SQUARE_TEXTURES       = 0;
+var GREEN_SQUARE_TEXTURES       = 1;
+var BLUE_SQUARE_TEXTURES        = 3;
+var RED_TRIANGLE_TEXTURES       = 2;
+var WHITE_TRIANGLE_TEXTURES     = 4;

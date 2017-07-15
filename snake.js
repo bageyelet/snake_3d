@@ -102,6 +102,14 @@ function initializeOldPos(snake) {
         initializeOldPos(snake.next);
 }
 
+function updateSnakeEnv(env, snake) {
+    var posx = Math.round(snake.data.pos[0]); var posy = Math.round(snake.data.pos[1]);
+    if (env[posx][posy].element != PIRAMID)
+        env[posx][posy].element = snake.data.type;
+    if (snake.next != null )
+        updateSnakeEnv(env, snake.next);
+}
+
 function updateFirstBodyPosition(snake_node, i) {
     switch (snake_node.prev.data.anim) {
         case FORWARD:

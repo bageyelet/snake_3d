@@ -24,11 +24,12 @@ var up_eye  = vec3(0.0, 1.0 , 0.0);
 var cameraMatrix; var projectionMatrix;
 var vBuffer; var vPosition;
 var nBuffer; var vNormal;
+var tBuffer; var vTexCoord;
 var buffer_indexes = {};
 var uColor;
 var uModelViewMatrix; var uProjectionMatrix; var uCameraMatrix;
 var uDiffuseProduct; var uSpecularProduct; var uShininess;
-var uFlagText1; var uFlagText2;
+var uFlagText1; var uFlagText2; var uText0;
 
 function setCamera(eye, at, update_global) {
     // eye.delta_transl; eye.delta_angle;
@@ -67,20 +68,22 @@ function renderTile(modelViewMatrix) {
 function renderEnv() {
     gl.uniform1f(uFlagText1, 1);
     gl.uniform1f(uFlagText2, 1);
-    gl.uniform4fv( uColor, WHITE);
+    gl.uniform4fv( uColor, BLUE);
     gl.uniform4fv( uDiffuseProduct, flatten(squareDiffuseProduct));
     gl.uniform4fv( uSpecularProduct, flatten(squareSpecularProduct));
     gl.uniform1f( uShininess, squareShininess);
+    gl.uniform1i(uText0, WHITE_SQUARE_TEXTURES);
     var scalematrix = scalem(tile_size_min,1.0,tile_size_min);
 
     for (var i=0; i<env_size_w; i++) {
         for (var j=0; j<env_size_h; j++) {
-            if (Math.ceil(snake_head.pos[0]) == i && Math.ceil(snake_head.pos[1]) == j) {
-                gl.uniform1i(gl.getUniformLocation( program, "Tex0"), GREEN_ENV_TEXTURES);
+            if (food[0][0] == i && food[0][1] == j || food[1][0] == i && food[1][1] == j) {
+                gl.uniform4fv( uColor, GREEN);
                 renderTile(mult(translate(tile_size_min/2 + tile_size_max*i , 0.0, tile_size_min/2 + tile_size_max*j), scalematrix));
-                gl.uniform1i(gl.getUniformLocation( program, "Tex0"), BLUE_ENV_TEXTURES);
-            } else 
+            } else {
+                gl.uniform4fv( uColor, environment[i][j].color);
                 renderTile(mult(translate(tile_size_min/2 + tile_size_max*i , 0.0, tile_size_min/2 + tile_size_max*j), scalematrix));
+            }
         }
     }
     gl.uniform1f(uFlagText1, 0);
@@ -97,6 +100,10 @@ function renderObject(type, positions, theta) {
             gl.uniform4fv( uSpecularProduct, flatten(piramidSpecularProduct));
             gl.uniform1f( uShininess, piramidShininess);
 
+            gl.uniform1i(uText0, WHITE_TRIANGLE_TEXTURES);
+            gl.uniform1f(uFlagText1, 1);
+            gl.uniform1f(uFlagText2, 1);
+
             for (var i=0; i<len; i++) {
                 var posX = positions[i][0]; var posY = positions[i][1];
                 var translateMatrix = translate(tile_size_min/2 + tile_size_max*posX , 0.01,tile_size_min/2 + tile_size_max*posY);
@@ -104,6 +111,9 @@ function renderObject(type, positions, theta) {
                 gl.uniformMatrix4fv(uModelViewMatrix, false, flatten(modelViewMatrix));
                 gl.drawArrays(gl.TRIANGLES, buffer_indexes[PIRAMID], lenPiramidArray);
             }
+
+            gl.uniform1f(uFlagText1, 0);
+            gl.uniform1f(uFlagText2, 0);
 
             break;
         case PARALLELEPIPED:
@@ -113,6 +123,10 @@ function renderObject(type, positions, theta) {
             gl.uniform4fv( uSpecularProduct, flatten(parallelepipedSpecularProduct));
             gl.uniform1f( uShininess, parallelepipedShininess);
 
+            gl.uniform1i(uText0, WHITE_SQUARE_TEXTURES);
+            gl.uniform1f(uFlagText1, 1);
+            gl.uniform1f(uFlagText2, 1);
+
             for (var i = 0; i < len; i++) {
                 var posX = positions[i][0]; var posY = positions[i][1];
                 var rotationmatrix = rotate(theta, [0, 1, 0] );
@@ -121,6 +135,9 @@ function renderObject(type, positions, theta) {
                 gl.uniformMatrix4fv(uModelViewMatrix, false, flatten(modelViewMatrix));
                 gl.drawArrays(gl.TRIANGLES, buffer_indexes[PARALLELEPIPED], lenParallelepipedArray);
             }
+
+            gl.uniform1f(uFlagText1, 0);
+            gl.uniform1f(uFlagText2, 0);
             break;
         case SNAKEHEAD:
 
@@ -258,6 +275,7 @@ window.onload = function init() {
     uDiffuseProduct  = gl.getUniformLocation(program, "diffuseProduct");
     uSpecularProduct = gl.getUniformLocation(program, "specularProduct");
     uShininess = gl.getUniformLocation(program, "shininess");
+    uText0 = gl.getUniformLocation( program, "Tex0");
 
     gl.uniformMatrix4fv( uProjectionMatrix, false, flatten(projectionMatrix));
 
@@ -284,21 +302,23 @@ window.onload = function init() {
     gl.vertexAttribPointer( vNormal, 4, gl.FLOAT, false, 0, 0 );
     gl.enableVertexAttribArray( vNormal );
 
-    buffer_indexes[SQUARE] = 0; buffer_indexes[PIRAMID] = 4; buffer_indexes[PARALLELEPIPED] = 22; 
-    buffer_indexes[SNAKEHEAD] = 58; buffer_indexes[SNAKEBODY] = 94; buffer_indexes[SNAKETAIL] = 130;
+    var allTextures = squareTexCoordsArray.concat(piramidTexCoordsArray).concat(parallelepipedTexCoordsArray);
+    for (var i=0; i<400; i++)
+        allTextures.push(vec2(0,0));
 
-    var tBuffer = gl.createBuffer();
+    tBuffer = gl.createBuffer();
     gl.bindBuffer( gl.ARRAY_BUFFER, tBuffer);
-    gl.bufferData( gl.ARRAY_BUFFER, flatten(texCoordsSquareArray), gl.STATIC_DRAW );
+    gl.bufferData( gl.ARRAY_BUFFER, flatten(allTextures), gl.STATIC_DRAW );
 
-    var vTexCoord = gl.getAttribLocation( program, "vTexCoord" );
+    vTexCoord = gl.getAttribLocation( program, "vTexCoord" );
     gl.vertexAttribPointer( vTexCoord, 2, gl.FLOAT, false, 0, 0 );
     gl.enableVertexAttribArray( vTexCoord );
 
-    initSquareBlueTexture(gl);    
-    initSquareGreenTexture(gl);
+    buffer_indexes[SQUARE] = 0; buffer_indexes[PIRAMID] = 4; buffer_indexes[PARALLELEPIPED] = 22; 
+    buffer_indexes[SNAKEHEAD] = 58; buffer_indexes[SNAKEBODY] = 94; buffer_indexes[SNAKETAIL] = 130;
 
-    gl.uniform1i(gl.getUniformLocation( program, "Tex0"), BLUE_ENV_TEXTURES);
+    initSquareWhiteTexture(gl);
+    initTriangleWhiteTexture(gl);
 
     uFlagText1 = gl.getUniformLocation(program, "flagText1");
     uFlagText2 = gl.getUniformLocation(program, "flagText2");
@@ -320,10 +340,12 @@ window.onload = function init() {
     food.push([8, 10]);
     food.push([11, 16]);
 
+    environment = build_env_matrix(env_size_w, env_size_h, food, poss);
+    console.log(environment);
+
     snake_head = {};
     snake_head.type = SNAKEHEAD;
     snake_head.pos = [Math.ceil(env_size_w/2), Math.ceil(env_size_h/2)];
-    snake_head.error_pos = [0,0];
     snake_head.angle = 0;
     snake_head.direction = NORTH;
     snake_head.anim = null;
@@ -334,7 +356,7 @@ window.onload = function init() {
     snakeList.add({type:SNAKEBODY, pos:[snake_head.pos[0], snake_head.pos[1]-3], angle:snake_head.angle, direction:snake_head.direction, anim: FORWARD});
     snakeList.add({type:SNAKEBODY, pos:[snake_head.pos[0], snake_head.pos[1]-2], angle:snake_head.angle, direction:snake_head.direction, anim: FORWARD});
     snakeList.add({type:SNAKEBODY, pos:[snake_head.pos[0], snake_head.pos[1]-1], angle:snake_head.angle, direction:snake_head.direction, anim: FORWARD});
-    snakeList.add(snake_head);
+    snakeList.add(snake_head);    
 
     renderEnv();
     renderEnvObjects(poss, [food, 0]);
@@ -435,6 +457,7 @@ function animation(type, curr) {
                 updateSnakePositions(snakeList.getSecond(), curr);
                 renderEnvObjects(poss, [food, theta_food]);
 
+                updateSnakeEnv(environment, snakeList.head);
                 window.requestAnimationFrame(render);
             } else {
                 gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -544,6 +567,7 @@ function animation(type, curr) {
                 updateSnakePositions(snakeList.getSecond(), curr);
                 renderEnvObjects(poss, [food, theta_food]);
 
+                updateSnakeEnv(environment, snakeList.head);
                 window.requestAnimationFrame(render);
             } else {
                 gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -643,6 +667,8 @@ function animation(type, curr) {
                     snake_head.pos = [snake_head.old_pos[0] + 1*sign(inc_tran.x), snake_head.old_pos[1] + 1*sign(inc_tran.y)];
                     updateSnakePositions(snakeList.getSecond(), curr);
                     renderEnvObjects(poss, [food, theta_food]);
+                    
+                    updateSnakeEnv(environment, snakeList.head);
                     window.requestAnimationFrame(render);
                 } else {
                     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -691,6 +717,13 @@ function render() {
     if (upKeyPressed) {
         upKeyPressed = false;
         animation(FORWARD, 0);
+        return;
+    }
+
+    if (environment[snake_head.pos[0]][snake_head.pos[1]].element == PIRAMID || environment[snake_head.pos[0]][snake_head.pos[1]].element == SNAKEBODY || 
+            environment[snake_head.pos[0]][snake_head.pos[1]].element == SNAKETAIL) {
+        alert("You lose");
+        window.location.reload(false);
         return;
     }
 

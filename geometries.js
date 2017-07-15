@@ -16,6 +16,11 @@ var squareNormalsArray = [
     vec4( 0.0, 1.0, 0.0, 0.0),
     vec4( 0.0, 1.0, 0.0, 0.0)
 ];
+
+var squareTexCoordsArray = [
+    texCoord[0], texCoord[1],
+    texCoord[2], texCoord[3]
+];
 // **********************************************************************************
 var piramid_vertices = [
     vec4(  1.0,  0.0,  1.0, 1.0 ),
@@ -29,9 +34,9 @@ var piramidArray =
 [piramid_vertices[0], piramid_vertices[1], piramid_vertices[2],
  piramid_vertices[0], piramid_vertices[2], piramid_vertices[3],
  piramid_vertices[0], piramid_vertices[1], piramid_vertices[4],
- piramid_vertices[0], piramid_vertices[3], piramid_vertices[4],
- piramid_vertices[3], piramid_vertices[2], piramid_vertices[4],
- piramid_vertices[2], piramid_vertices[1], piramid_vertices[4]];
+ piramid_vertices[0], piramid_vertices[4], piramid_vertices[3],
+ piramid_vertices[3], piramid_vertices[4], piramid_vertices[2],
+ piramid_vertices[2], piramid_vertices[4], piramid_vertices[1]];
 var lenPiramidArray = 18;
 
 var piramidNormalsArray = [];
@@ -42,7 +47,16 @@ for (var i=0; i<lenPiramidArray/3; i++) {
       piramidNormalsArray.push(vec4(normalize(cross(t1,t2)), 0.0));
 }
 
-var piramid_scalematrix = scalem(0.11,0.16,0.11);
+var piramid_scalematrix = scalem(0.11,0.20,0.11);
+
+var piramidTexCoordsArray = [
+    texCoord[3], texCoord[2], texCoord[1],
+    texCoord[3], texCoord[1], texCoord[0],
+    texCoord[0], texCoord[1], texCoord[3],
+    texCoord[0], texCoord[1], texCoord[3],
+    texCoord[0], texCoord[1], texCoord[3],
+    texCoord[0], texCoord[1], texCoord[3]
+];
 // **********************************************************************************
 var parallelepiped_vertices = [
     vec4( -0.5, 0.0,  0.5, 1.0 ),
@@ -56,18 +70,18 @@ var parallelepiped_vertices = [
 ];
 // gl.TRIANGLES
 var parallelepipedArray =
-[ parallelepiped_vertices[0], parallelepiped_vertices[1], parallelepiped_vertices[3],
-  parallelepiped_vertices[1], parallelepiped_vertices[2], parallelepiped_vertices[3],
-  parallelepiped_vertices[0], parallelepiped_vertices[4], parallelepiped_vertices[3],
-  parallelepiped_vertices[3], parallelepiped_vertices[4], parallelepiped_vertices[7],
-  parallelepiped_vertices[3], parallelepiped_vertices[7], parallelepiped_vertices[2],
-  parallelepiped_vertices[7], parallelepiped_vertices[6], parallelepiped_vertices[2],
-  parallelepiped_vertices[7], parallelepiped_vertices[4], parallelepiped_vertices[5],
-  parallelepiped_vertices[7], parallelepiped_vertices[5], parallelepiped_vertices[6],
-  parallelepiped_vertices[0], parallelepiped_vertices[1], parallelepiped_vertices[5],
-  parallelepiped_vertices[0], parallelepiped_vertices[5], parallelepiped_vertices[4],
-  parallelepiped_vertices[1], parallelepiped_vertices[2], parallelepiped_vertices[6],
-  parallelepiped_vertices[1], parallelepiped_vertices[6], parallelepiped_vertices[5]];
+[ parallelepiped_vertices[0], parallelepiped_vertices[3], parallelepiped_vertices[1],
+  parallelepiped_vertices[1], parallelepiped_vertices[3], parallelepiped_vertices[2],
+  parallelepiped_vertices[0], parallelepiped_vertices[3], parallelepiped_vertices[4],
+  parallelepiped_vertices[3], parallelepiped_vertices[7], parallelepiped_vertices[4],
+  parallelepiped_vertices[3], parallelepiped_vertices[2], parallelepiped_vertices[7],
+  parallelepiped_vertices[7], parallelepiped_vertices[2], parallelepiped_vertices[6],
+  parallelepiped_vertices[7], parallelepiped_vertices[5], parallelepiped_vertices[4],
+  parallelepiped_vertices[7], parallelepiped_vertices[6], parallelepiped_vertices[5],
+  parallelepiped_vertices[0], parallelepiped_vertices[5], parallelepiped_vertices[1],
+  parallelepiped_vertices[0], parallelepiped_vertices[4], parallelepiped_vertices[5],
+  parallelepiped_vertices[1], parallelepiped_vertices[6], parallelepiped_vertices[2],
+  parallelepiped_vertices[1], parallelepiped_vertices[5], parallelepiped_vertices[6]];
 var lenParallelepipedArray = 36;
 
 var parallelepipedNormalsArray = [];
@@ -77,6 +91,21 @@ for (var i=0; i<lenParallelepipedArray/3; i++) {
     for (var j=0; j<3; j++)
       parallelepipedNormalsArray.push(vec4(normalize(cross(t1,t2)), 0.0));
 }
+
+var parallelepipedTexCoordsArray = [
+    texCoord[0], texCoord[3], texCoord[1],
+    texCoord[1], texCoord[3], texCoord[2],
+    texCoord[0], texCoord[3], texCoord[1],
+    texCoord[3], texCoord[2], texCoord[1],
+    texCoord[0], texCoord[3], texCoord[1],
+    texCoord[1], texCoord[3], texCoord[2],
+    texCoord[3], texCoord[1], texCoord[0],
+    texCoord[3], texCoord[2], texCoord[1],
+    texCoord[0], texCoord[2], texCoord[3],
+    texCoord[0], texCoord[1], texCoord[2],
+    texCoord[0], texCoord[2], texCoord[3],
+    texCoord[0], texCoord[1], texCoord[2]
+];
 
 var parallelepiped_scalematrix = scalem(0.11,0.11,0.03);
 // **********************************************************************************

@@ -43,9 +43,7 @@ varying vec2 fTexCoord;
 
 void main()
 {
-    vec4 dirLightDirection = vec4( -1.0, 2.0, -1.0, 0.0);
-    // vec4 diffuseDir = vec4( 0.6, 0.6, 0.6, 1.0 );
-    // vec4 specularDir = vec4( 0.2, 0.2, 0.2, 1.0 );
+    vec4 dirLightDirection = vec4( 2.0, 2.0, 2.0, 0.0);
 
     vec3 Ldir = normalize( dirLightDirection.xyz );
     vec3 Hdir = normalize( Ldir + E );
@@ -57,9 +55,11 @@ void main()
         specular = vec4(0.0, 0.0, 0.0, 0.0);
     }
 
-    vec4 frag_color = 1.0*color + diffuse + specular;
-    if (flagText2)
-        frag_color = texture2D(Tex0, fTexCoord)*frag_color;
+    vec4 frag_color = 0.8*color + diffuse + specular;
+
+    if (flagText2) {
+        frag_color = specular + texture2D(Tex0, fTexCoord)*frag_color;
+    }
     gl_FragColor.x = frag_color.x>1.0?1.0:frag_color.x;
     gl_FragColor.y = frag_color.y>1.0?1.0:frag_color.y;
     gl_FragColor.z = frag_color.z>1.0?1.0:frag_color.z;
@@ -74,9 +74,9 @@ void main()
 <script type="text/javascript" src="./Common/MV.js"></script>
 <script type="text/javascript" src="list.js"></script>
 <script type="text/javascript" src="constants.js"></script>
-<script type="text/javascript" src="geometries.js"></script>
 <script type="text/javascript" src="util.js"></script>
 <script type="text/javascript" src="textures.js"></script>
+<script type="text/javascript" src="geometries.js"></script>
 <script type="text/javascript" src="snake.js"></script>
 <script type="text/javascript" src="main.js"></script>
 

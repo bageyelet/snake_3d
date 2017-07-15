@@ -109,19 +109,37 @@ function min(v1,v2) {
     else return v2;
 }
 
+function abs(v) {
+    if (v>0)
+        return v;
+    else return -v;
+}
 
-function build_env(env_w, env_h) {
+function build_env_matrix(env_w, env_h, food, obstacles) {
     var ris = [];
     for (var i=0; i<env_w; i++) {
         ris.push([]);
         for (var j=0; j<env_h; j++) {
-            if (i==0 || j==0 || i==env_w-1 || j==env_h-1)
-                ris[i][j] = PIRAMID;
-            else if ((i==3 && j==3) || (i==10 && j==12))
-                ris[i][j] = PARALLELEPIPED;
-            else
-                ris[i][j] = VOID;
+            var el = {};
+            el.element = VOID;
+            for (var k=0; k<food.length; k++) {
+                if (food[k][0] == i && food[k][1] == j) {
+                    el.element = PARALLELEPIPED;
+                    break;
+                }
+            }
+            for (var k=0; k<obstacles.length; k++) {
+                if (obstacles[k][0] == i && obstacles[k][1] == j) {
+                    el.element = PIRAMID;
+                    break;
+                }
+            }
+            el.color = vec4( linear_interpolation(i, 0, env_w, 0.1, 0.9), 
+                             linear_interpolation(i+j, 0, env_w+env_h, 0.1, 0.9), 
+                             linear_interpolation(j, 0, env_h, 0.1, 0.9), 1.0);
+            ris[i][j] = el;
         }
+        
     }
     return ris;
 }
