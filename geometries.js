@@ -78,7 +78,7 @@ for (var i=0; i<lenParallelepipedArray/3; i++) {
       parallelepipedNormalsArray.push(vec4(normalize(cross(t1,t2)), 0.0));
 }
 
-var parallelepiped_scalematrix = scalem(0.11,0.11,0.05);
+var parallelepiped_scalematrix = scalem(0.11,0.11,0.03);
 // **********************************************************************************
 var snakehead_vertices = [
     vec4( 0.0 , 0.0 , 0.35 ),
@@ -151,7 +151,7 @@ for (var i=0; i<lenSnakebodyArray/3; i++) {
       snakebodyNormalsArray.push(vec4(normalize(cross(t1,t2)), 0.0));
 }
 
-var snakebody_scalematrix = scalem(0.3,0.5,0.95);
+var snakebody_scalematrix = scalem(0.3,0.5,0.90);
 // **********************************************************************************
 var snaketail_vertices = [
     vec4(-0.18, 0.0 , 0.2 ),
@@ -162,7 +162,7 @@ var snaketail_vertices = [
 ];
 // gl.TRIANGLES
 var snaketailArray = 
-[ snaketail_vertices[0], snaketail_vertices[3], snaketail_vertices[1],
+[ snaketail_vertices[0], snaketail_vertices[1], snaketail_vertices[3],
   snaketail_vertices[3], snaketail_vertices[1], snaketail_vertices[2],
   snaketail_vertices[0], snaketail_vertices[3], snaketail_vertices[4],
   snaketail_vertices[0], snaketail_vertices[1], snaketail_vertices[4],

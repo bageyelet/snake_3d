@@ -1,11 +1,15 @@
 "use strict";
 
+var gl; 
+
 // colors
 var RED         = vec4( 1.0, 0.0, 0.0, 1.0 );
 var BLUE        = vec4( 0.0, 0.0, 1.0, 1.0 );
 var GREEN       = vec4( 0.1, 0.8, 0.1, 1.0 );
 var LIGHT_GREY  = vec4( 0.4, 0.4, 0.4, 1.0 );
 var PURPLE      = vec4( 0.5, 0.0, 0.5, 1.0 );
+var BLACK       = vec4( 0.0, 0.0, 0.0, 1.0 );
+var WHITE       = vec4( 1.0, 1.0, 1.0, 1.0 );
 
 // objects
 var PIRAMID         = 0;
@@ -64,3 +68,7 @@ var snakeSpecularParameter = vec4( 0.1, 0.1, 0.1, 1.0 );
 var snakeShininess = 500.0;
 var snakeDiffuseProduct  = mult(snakeDiffuseParameter, lightDiffuse);
 var snakeSpecularProduct = mult(snakeSpecularParameter, lightSpecular);
+
+// textures
+var BLUE_ENV_TEXTURES  = 0;
+var GREEN_ENV_TEXTURES = 1;

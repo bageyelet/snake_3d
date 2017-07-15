@@ -104,6 +104,12 @@ function sign(val) {
     else return -1;
 }
 
+function min(v1,v2) {
+    if (v1<v2) return v1;
+    else return v2;
+}
+
+
 function build_env(env_w, env_h) {
     var ris = [];
     for (var i=0; i<env_w; i++) {

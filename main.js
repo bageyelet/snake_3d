@@ -1,10 +1,10 @@
 "use strict";
-var gl; var canvas; var program;
+var canvas; var program;
 var stats;
 
 var square_size = 1.0;
 var tile_size_max = 0.25;
-var tile_size_min = 0.22;
+var tile_size_min = 0.25;
 
 var env_size_w = 25;
 var env_size_h = 25;
@@ -28,6 +28,7 @@ var buffer_indexes = {};
 var uColor;
 var uModelViewMatrix; var uProjectionMatrix; var uCameraMatrix;
 var uDiffuseProduct; var uSpecularProduct; var uShininess;
+var uFlagText1; var uFlagText2;
 
 function setCamera(eye, at, update_global) {
     // eye.delta_transl; eye.delta_angle;
@@ -64,8 +65,9 @@ function renderTile(modelViewMatrix) {
 }
 
 function renderEnv() {
-
-    gl.uniform4fv( uColor, PURPLE);
+    gl.uniform1f(uFlagText1, 1);
+    gl.uniform1f(uFlagText2, 1);
+    gl.uniform4fv( uColor, WHITE);
     gl.uniform4fv( uDiffuseProduct, flatten(squareDiffuseProduct));
     gl.uniform4fv( uSpecularProduct, flatten(squareSpecularProduct));
     gl.uniform1f( uShininess, squareShininess);
@@ -73,9 +75,16 @@ function renderEnv() {
 
     for (var i=0; i<env_size_w; i++) {
         for (var j=0; j<env_size_h; j++) {
-            renderTile(mult(translate(tile_size_min/2 + tile_size_max*i , 0.0, tile_size_min/2 + tile_size_max*j), scalematrix));
+            if (Math.ceil(snake_head.pos[0]) == i && Math.ceil(snake_head.pos[1]) == j) {
+                gl.uniform1i(gl.getUniformLocation( program, "Tex0"), GREEN_ENV_TEXTURES);
+                renderTile(mult(translate(tile_size_min/2 + tile_size_max*i , 0.0, tile_size_min/2 + tile_size_max*j), scalematrix));
+                gl.uniform1i(gl.getUniformLocation( program, "Tex0"), BLUE_ENV_TEXTURES);
+            } else 
+                renderTile(mult(translate(tile_size_min/2 + tile_size_max*i , 0.0, tile_size_min/2 + tile_size_max*j), scalematrix));
         }
     }
+    gl.uniform1f(uFlagText1, 0);
+    gl.uniform1f(uFlagText2, 0);
 }
 
 function renderObject(type, positions, theta) {
@@ -99,7 +108,7 @@ function renderObject(type, positions, theta) {
             break;
         case PARALLELEPIPED:
 
-            gl.uniform4fv( uColor, BLUE);
+            gl.uniform4fv( uColor, GREEN);
             gl.uniform4fv( uDiffuseProduct, flatten(parallelepipedDiffuseProduct));
             gl.uniform4fv( uSpecularProduct, flatten(parallelepipedSpecularProduct));
             gl.uniform1f( uShininess, parallelepipedShininess);
@@ -115,7 +124,7 @@ function renderObject(type, positions, theta) {
             break;
         case SNAKEHEAD:
 
-            gl.uniform4fv( uColor, GREEN);
+            gl.uniform4fv( uColor, PURPLE);
             gl.uniform4fv( uDiffuseProduct, flatten(snakeDiffuseProduct));
             gl.uniform4fv( uSpecularProduct, flatten(snakeSpecularProduct));
             gl.uniform1f( uShininess, snakeShininess);
@@ -131,7 +140,7 @@ function renderObject(type, positions, theta) {
             break;
         case SNAKEBODY:
 
-            gl.uniform4fv( uColor, GREEN);
+            gl.uniform4fv( uColor, PURPLE);
             gl.uniform4fv( uDiffuseProduct, flatten(snakeDiffuseProduct));
             gl.uniform4fv( uSpecularProduct, flatten(snakeSpecularProduct));
             gl.uniform1f( uShininess, snakeShininess);
@@ -148,7 +157,7 @@ function renderObject(type, positions, theta) {
 
         case SNAKETAIL:
 
-            gl.uniform4fv( uColor, GREEN);
+            gl.uniform4fv( uColor, PURPLE);
             gl.uniform4fv( uDiffuseProduct, flatten(snakeDiffuseProduct));
             gl.uniform4fv( uSpecularProduct, flatten(snakeSpecularProduct));
             gl.uniform1f( uShininess, snakeShininess);
@@ -277,6 +286,24 @@ window.onload = function init() {
 
     buffer_indexes[SQUARE] = 0; buffer_indexes[PIRAMID] = 4; buffer_indexes[PARALLELEPIPED] = 22; 
     buffer_indexes[SNAKEHEAD] = 58; buffer_indexes[SNAKEBODY] = 94; buffer_indexes[SNAKETAIL] = 130;
+
+    var tBuffer = gl.createBuffer();
+    gl.bindBuffer( gl.ARRAY_BUFFER, tBuffer);
+    gl.bufferData( gl.ARRAY_BUFFER, flatten(texCoordsSquareArray), gl.STATIC_DRAW );
+
+    var vTexCoord = gl.getAttribLocation( program, "vTexCoord" );
+    gl.vertexAttribPointer( vTexCoord, 2, gl.FLOAT, false, 0, 0 );
+    gl.enableVertexAttribArray( vTexCoord );
+
+    initSquareBlueTexture(gl);    
+    initSquareGreenTexture(gl);
+
+    gl.uniform1i(gl.getUniformLocation( program, "Tex0"), BLUE_ENV_TEXTURES);
+
+    uFlagText1 = gl.getUniformLocation(program, "flagText1");
+    uFlagText2 = gl.getUniformLocation(program, "flagText2");
+    gl.uniform1f(uFlagText1, 0);
+    gl.uniform1f(uFlagText2, 0);
 
     initializePositionUpdater();
 
