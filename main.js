@@ -29,7 +29,7 @@ var buffer_indexes = {};
 var uColor;
 var uModelViewMatrix; var uProjectionMatrix; var uCameraMatrix;
 var uDiffuseProduct; var uSpecularProduct; var uShininess;
-var uFlagText1; var uFlagText2; var uText0;
+var uText0;
 
 function setCamera(eye, at, update_global) {
     // eye.delta_transl; eye.delta_angle;
@@ -66,8 +66,6 @@ function renderTile(modelViewMatrix) {
 }
 
 function renderEnv() {
-    gl.uniform1f(uFlagText1, 1);
-    gl.uniform1f(uFlagText2, 1);
     gl.uniform4fv( uColor, BLUE);
     gl.uniform4fv( uDiffuseProduct, flatten(squareDiffuseProduct));
     gl.uniform4fv( uSpecularProduct, flatten(squareSpecularProduct));
@@ -86,8 +84,6 @@ function renderEnv() {
             }
         }
     }
-    gl.uniform1f(uFlagText1, 0);
-    gl.uniform1f(uFlagText2, 0);
 }
 
 function renderObject(type, positions, theta) {
@@ -101,8 +97,6 @@ function renderObject(type, positions, theta) {
             gl.uniform1f( uShininess, piramidShininess);
 
             gl.uniform1i(uText0, WHITE_TRIANGLE_TEXTURES);
-            gl.uniform1f(uFlagText1, 1);
-            gl.uniform1f(uFlagText2, 1);
 
             for (var i=0; i<len; i++) {
                 var posX = positions[i][0]; var posY = positions[i][1];
@@ -111,9 +105,6 @@ function renderObject(type, positions, theta) {
                 gl.uniformMatrix4fv(uModelViewMatrix, false, flatten(modelViewMatrix));
                 gl.drawArrays(gl.TRIANGLES, buffer_indexes[PIRAMID], lenPiramidArray);
             }
-
-            gl.uniform1f(uFlagText1, 0);
-            gl.uniform1f(uFlagText2, 0);
 
             break;
         case PARALLELEPIPED:
@@ -124,8 +115,6 @@ function renderObject(type, positions, theta) {
             gl.uniform1f( uShininess, parallelepipedShininess);
 
             gl.uniform1i(uText0, WHITE_SQUARE_TEXTURES);
-            gl.uniform1f(uFlagText1, 1);
-            gl.uniform1f(uFlagText2, 1);
 
             for (var i = 0; i < len; i++) {
                 var posX = positions[i][0]; var posY = positions[i][1];
@@ -135,9 +124,6 @@ function renderObject(type, positions, theta) {
                 gl.uniformMatrix4fv(uModelViewMatrix, false, flatten(modelViewMatrix));
                 gl.drawArrays(gl.TRIANGLES, buffer_indexes[PARALLELEPIPED], lenParallelepipedArray);
             }
-
-            gl.uniform1f(uFlagText1, 0);
-            gl.uniform1f(uFlagText2, 0);
             break;
         case SNAKEHEAD:
 
@@ -145,6 +131,8 @@ function renderObject(type, positions, theta) {
             gl.uniform4fv( uDiffuseProduct, flatten(snakeDiffuseProduct));
             gl.uniform4fv( uSpecularProduct, flatten(snakeSpecularProduct));
             gl.uniform1f( uShininess, snakeShininess);
+
+            gl.uniform1i(uText0, WHITE_TRIANGLE_TEXTURES);
 
             for (var i = 0; i < len; i++) {
                 var posX = positions[i][0]; var posY = positions[i][1];
@@ -162,6 +150,8 @@ function renderObject(type, positions, theta) {
             gl.uniform4fv( uSpecularProduct, flatten(snakeSpecularProduct));
             gl.uniform1f( uShininess, snakeShininess);
 
+            gl.uniform1i(uText0, WHITE_SQUARE_TEXTURES);
+
             for (var i = 0; i < len; i++) {
                 var posX = positions[i][0]; var posY = positions[i][1];
                 var rotationmatrix = rotate(theta[i], [0, 1, 0] );
@@ -178,6 +168,8 @@ function renderObject(type, positions, theta) {
             gl.uniform4fv( uDiffuseProduct, flatten(snakeDiffuseProduct));
             gl.uniform4fv( uSpecularProduct, flatten(snakeSpecularProduct));
             gl.uniform1f( uShininess, snakeShininess);
+
+            gl.uniform1i(uText0, WHITE_TRIANGLE_TEXTURES);
 
             for (var i = 0; i < len; i++) {
                 var posX = positions[i][0]; var posY = positions[i][1];
@@ -302,9 +294,10 @@ window.onload = function init() {
     gl.vertexAttribPointer( vNormal, 4, gl.FLOAT, false, 0, 0 );
     gl.enableVertexAttribArray( vNormal );
 
-    var allTextures = squareTexCoordsArray.concat(piramidTexCoordsArray).concat(parallelepipedTexCoordsArray);
-    for (var i=0; i<400; i++)
-        allTextures.push(vec2(0,0));
+    var allTextures = squareTexCoordsArray.concat(piramidTexCoordsArray).concat(parallelepipedTexCoordsArray).concat(snakeheadTexCoordsArray)
+                        .concat(snakebodyTexCoordsArray).concat(snaketailTexCoordsArray);
+    // for (var i=0; i<400; i++)
+    //     allTextures.push(vec2(0,0));
 
     tBuffer = gl.createBuffer();
     gl.bindBuffer( gl.ARRAY_BUFFER, tBuffer);
@@ -319,11 +312,6 @@ window.onload = function init() {
 
     initSquareWhiteTexture(gl);
     initTriangleWhiteTexture(gl);
-
-    uFlagText1 = gl.getUniformLocation(program, "flagText1");
-    uFlagText2 = gl.getUniformLocation(program, "flagText2");
-    gl.uniform1f(uFlagText1, 0);
-    gl.uniform1f(uFlagText2, 0);
 
     initializePositionUpdater();
 
@@ -341,7 +329,6 @@ window.onload = function init() {
     food.push([11, 16]);
 
     environment = build_env_matrix(env_size_w, env_size_h, food, poss);
-    console.log(environment);
 
     snake_head = {};
     snake_head.type = SNAKEHEAD;
@@ -719,6 +706,8 @@ function render() {
         animation(FORWARD, 0);
         return;
     }
+
+    // animation(FORWARD, 0);
 
     if (environment[snake_head.pos[0]][snake_head.pos[1]].element == PIRAMID || environment[snake_head.pos[0]][snake_head.pos[1]].element == SNAKEBODY || 
             environment[snake_head.pos[0]][snake_head.pos[1]].element == SNAKETAIL) {

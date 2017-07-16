@@ -1,4 +1,4 @@
-var texSize = 256;
+var texSize = 2048;
 var v;
 
 var imageSquareWhite = new Uint8Array(4*texSize*texSize);
@@ -153,10 +153,19 @@ function initTriangleRedTexture(gl) {
 }
 
 var texCoord = [
-    vec2(0, 0),
-    vec2(0, 1),
-    vec2(1, 1),
-    vec2(1, 0)
+    vec2(0  , 0  ),
+    vec2(0  , 1  ),
+    vec2(1  , 1  ),
+    vec2(1  , 0  ),
+    vec2(0  , 0.5),
+    vec2(0.5, 0  )
+];
+
+var texCoord1 = [
+    vec2(0.1, 0.1),
+    vec2(0.1, 0.9),
+    vec2(0.9, 0.9),
+    vec2(0.9, 0.1)
 ];
 
 // for (var i=0; i<400; i++)

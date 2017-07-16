@@ -121,13 +121,13 @@ var snakehead_vertices = [
 ];
 // gl.TRIANGLES
 var snakeheadArray = 
-[ snakehead_vertices[0], snakehead_vertices[3], snakehead_vertices[2],
-  snakehead_vertices[0], snakehead_vertices[2], snakehead_vertices[1],
+[ snakehead_vertices[0], snakehead_vertices[2], snakehead_vertices[3],
+  snakehead_vertices[0], snakehead_vertices[1], snakehead_vertices[2],
   snakehead_vertices[0], snakehead_vertices[3], snakehead_vertices[1],
-  snakehead_vertices[1], snakehead_vertices[7], snakehead_vertices[4],
-  snakehead_vertices[4], snakehead_vertices[3], snakehead_vertices[1],
-  snakehead_vertices[4], snakehead_vertices[7], snakehead_vertices[5],
-  snakehead_vertices[6], snakehead_vertices[5], snakehead_vertices[7],
+  snakehead_vertices[1], snakehead_vertices[4], snakehead_vertices[7],
+  snakehead_vertices[4], snakehead_vertices[1], snakehead_vertices[3],
+  snakehead_vertices[4], snakehead_vertices[5], snakehead_vertices[7],
+  snakehead_vertices[6], snakehead_vertices[7], snakehead_vertices[5],
   snakehead_vertices[5], snakehead_vertices[3], snakehead_vertices[4],
   snakehead_vertices[3], snakehead_vertices[2], snakehead_vertices[5],
   snakehead_vertices[2], snakehead_vertices[6], snakehead_vertices[5],
@@ -142,6 +142,21 @@ for (var i=0; i<lenSnakeheadArray/3; i++) {
     for (var j=0; j<3; j++)
       snakeheadNormalsArray.push(vec4(normalize(cross(t1,t2)), 0.0));
 }
+
+var snakeheadTexCoordsArray = [
+    texCoord[0], texCoord[1], texCoord[3],
+    texCoord[0], texCoord[1], texCoord[3],
+    texCoord[0], texCoord[1], texCoord[3],
+    texCoord[4], texCoord[5], texCoord[0],
+    texCoord[4], texCoord[5], texCoord[0],
+    texCoord[0], texCoord[4], texCoord[5],
+    texCoord[0], texCoord[4], texCoord[5],
+    texCoord[0], texCoord[1], texCoord[3],
+    texCoord[0], texCoord[1], texCoord[3],
+    texCoord[0], texCoord[1], texCoord[3],
+    texCoord[0], texCoord[1], texCoord[3],
+    texCoord[0], texCoord[1], texCoord[3]
+];
 
 var snakehead_scalematrix = scalem(0.43,0.55,0.25);
 // **********************************************************************************
@@ -158,8 +173,8 @@ var snakebody_vertices = [
 // gl.TRIANGLES
 var snakebodyArray =
 [ 
-  snakebody_vertices[0], snakebody_vertices[1], snakebody_vertices[3],
-  snakebody_vertices[1], snakebody_vertices[2], snakebody_vertices[3],
+  snakebody_vertices[0], snakebody_vertices[3], snakebody_vertices[1],
+  snakebody_vertices[1], snakebody_vertices[3], snakebody_vertices[2],
   snakebody_vertices[4], snakebody_vertices[7], snakebody_vertices[5],
   snakebody_vertices[6], snakebody_vertices[5], snakebody_vertices[7],
   snakebody_vertices[0], snakebody_vertices[1], snakebody_vertices[4],
@@ -180,7 +195,22 @@ for (var i=0; i<lenSnakebodyArray/3; i++) {
       snakebodyNormalsArray.push(vec4(normalize(cross(t1,t2)), 0.0));
 }
 
-var snakebody_scalematrix = scalem(0.3,0.5,0.90);
+var snakebodyTexCoordsArray = [
+    texCoord1[0], texCoord1[3], texCoord1[1],
+    texCoord1[1], texCoord1[3], texCoord1[2],
+    texCoord1[0], texCoord1[3], texCoord1[1],
+    texCoord1[2], texCoord1[1], texCoord1[3],
+    texCoord1[0], texCoord1[1], texCoord1[3],
+    texCoord1[1], texCoord1[3], texCoord1[2],
+    texCoord1[1], texCoord1[0], texCoord1[3],
+    texCoord1[3], texCoord1[2], texCoord1[1],
+    texCoord1[1], texCoord1[0], texCoord1[3],
+    texCoord1[3], texCoord1[2], texCoord1[1],
+    texCoord1[0], texCoord1[2], texCoord1[3],
+    texCoord1[1], texCoord1[0], texCoord1[2]
+];
+
+var snakebody_scalematrix = scalem(0.3,0.5,0.80);
 // **********************************************************************************
 var snaketail_vertices = [
     vec4(-0.18, 0.0 , 0.2 ),
@@ -206,6 +236,15 @@ for (var i=0; i<lenSnaketailArray/3; i++) {
     for (var j=0; j<3; j++)
       snaketailNormalsArray.push(vec4(normalize(cross(t1,t2)), 0.0));
 }
+
+var snaketailTexCoordsArray = [
+    texCoord[0], texCoord[1], texCoord[5],
+    texCoord[4], texCoord[5], texCoord[0],
+    texCoord[3], texCoord[0], texCoord[1],
+    texCoord[3], texCoord[0], texCoord[1],
+    texCoord[3], texCoord[0], texCoord[1],
+    texCoord[3], texCoord[0], texCoord[1]
+];
 
 var snaketail_scalematrix = scalem(0.3,0.5,0.45);
 // **********************************************************************************

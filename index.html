@@ -10,7 +10,6 @@ attribute  vec2 vTexCoord;
 uniform mat4 modelViewMatrix;
 uniform mat4 projectionMatrix;
 uniform mat4 cameraMatrix;
-uniform bool flagText1;
 
 varying vec3 N, E;
 varying vec2 fTexCoord;
@@ -22,8 +21,7 @@ void main()
     E = - normalize( (cameraMatrix * pos).xyz );       // vector from vertex to camera
     N = normalize( (modelViewMatrix * vNormal).xyz);   // normal in world coordinates
 
-    if (flagText1)
-        fTexCoord = vTexCoord;
+    fTexCoord = vTexCoord;
     gl_Position = projectionMatrix * cameraMatrix * modelViewMatrix * vPosition;
 }
 </script>
@@ -36,7 +34,6 @@ uniform vec4 color;
 uniform vec4 diffuseProduct, specularProduct;
 uniform float shininess;
 uniform sampler2D Tex0;
-uniform bool flagText2;
 
 varying vec3 N, E;
 varying vec2 fTexCoord;
@@ -55,11 +52,8 @@ void main()
         specular = vec4(0.0, 0.0, 0.0, 0.0);
     }
 
-    vec4 frag_color = 0.8*color + diffuse + specular;
+    vec4 frag_color = specular + texture2D(Tex0, fTexCoord)*(color + diffuse);
 
-    if (flagText2) {
-        frag_color = specular + texture2D(Tex0, fTexCoord)*frag_color;
-    }
     gl_FragColor.x = frag_color.x>1.0?1.0:frag_color.x;
     gl_FragColor.y = frag_color.y>1.0?1.0:frag_color.y;
     gl_FragColor.z = frag_color.z>1.0?1.0:frag_color.z;
