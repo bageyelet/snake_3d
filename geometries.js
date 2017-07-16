@@ -210,7 +210,7 @@ var snakebodyTexCoordsArray = [
     texCoord1[1], texCoord1[0], texCoord1[2]
 ];
 
-var snakebody_scalematrix = scalem(0.3,0.5,0.80);
+var snakebody_scalematrix = scalem(0.3,0.5,0.90);
 // **********************************************************************************
 var snaketail_vertices = [
     vec4(-0.18, 0.0 , 0.2 ),

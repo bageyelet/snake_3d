@@ -12,11 +12,11 @@ function* genForward() {
 }
 var forwardArray = [];
 
-var delta = 0.28;
+var delta = 0.26; var delta_angle = 45;
 function* genForwardRotation() {
     var inc_x = linear_interpolation(speed, 0, max_curr, 0, 1-delta);
     var inc_y = linear_interpolation(speed, 0, max_curr, 0, delta);
-    var inc_angle = linear_interpolation(speed, 0, max_curr, 0, 30);
+    var inc_angle = linear_interpolation(speed, 0, max_curr, 0, delta_angle);
     var tot = [0, 0]; var tot_angle = 0;
     for (var i=0; i<max_curr/speed ; i++) {
         yield [[tot[0], tot[1]], tot_angle];
@@ -24,15 +24,15 @@ function* genForwardRotation() {
         tot[1] += inc_y;
         tot_angle += inc_angle;
     }
-    yield [[1-delta, delta], 30];
-    yield [[1-delta, delta], 30];
+    yield [[1-delta, delta], delta_angle];
+    yield [[1-delta, delta], delta_angle];
 }
 var forwardRotationArray = [];
 
 function* genStraigthen() {
     var inc_x = linear_interpolation(speed, 0, max_curr, 0, 1-delta);
     var inc_y = linear_interpolation(speed, 0, max_curr, 0, delta);
-    var inc_angle = linear_interpolation(speed, 0, max_curr, 0, 60);
+    var inc_angle = linear_interpolation(speed, 0, max_curr, 0, 90-delta_angle);
     var tot = [0, 0]; var tot_angle = 0;
     for (var i=0; i<max_curr/speed ; i++) {
         yield [[tot[0], tot[1]], tot_angle];
@@ -40,8 +40,8 @@ function* genStraigthen() {
         tot[1] += inc_y;
         tot_angle += inc_angle;
     }
-    yield [[1-delta, delta], 60];
-    yield [[1-delta, delta], 60];
+    yield [[1-delta, delta], 90-delta_angle];
+    yield [[1-delta, delta], 90-delta_angle];
 }
 var straigthenArray = [];
 
@@ -62,7 +62,7 @@ var furtherRotationArray = [];
 function* genFurtherRotation2() {
     var inc_x = linear_interpolation(speed, 0, max_curr, 0, 1-2*delta);
     var inc_y = linear_interpolation(speed, 0, max_curr, 0, 2*delta);
-    var inc_angle = linear_interpolation(speed, 0, max_curr, 0, -30);
+    var inc_angle = linear_interpolation(speed, 0, max_curr, 0, 2*delta_angle-90);
     var tot = [0, 0]; var tot_angle = 0;
     for (var i=0; i<max_curr/speed ; i++) {
         yield [[tot[0], tot[1]], tot_angle];
@@ -70,8 +70,8 @@ function* genFurtherRotation2() {
         tot[1] += inc_y;
         tot_angle += inc_angle;
     }
-    yield [[1-2*delta, 2*delta], -30];
-    yield [[1-2*delta, 2*delta], -30];
+    yield [[1-2*delta, 2*delta], 2*delta_angle-90];
+    yield [[1-2*delta, 2*delta], 2*delta_angle-90];
 }
 var furtherRotation2Array = [];
 

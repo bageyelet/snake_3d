@@ -239,12 +239,12 @@ window.onload = function init() {
     canvas.height = window.innerHeight-250;
     canvas.style.display = "block";
 
-    stats = new Stats();
-    stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
-    stats.domElement.style.position = 'absolute';
-    stats.domElement.style.left = '8px';
-    stats.domElement.style.top = '8px';
-    document.body.appendChild( stats.dom );
+    // stats = new Stats();
+    // stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
+    // stats.domElement.style.position = 'absolute';
+    // stats.domElement.style.left = '8px';
+    // stats.domElement.style.top = '8px';
+    // document.body.appendChild( stats.dom );
 
     gl = WebGLUtils.setupWebGL( canvas );
     if ( !gl ) { alert( "WebGL isn't available" ); }
@@ -445,6 +445,7 @@ function animation(type, curr) {
                 renderEnvObjects(poss, [food, theta_food]);
 
                 updateSnakeEnv(environment, snakeList.head);
+                checkLose();
                 window.requestAnimationFrame(render);
             } else {
                 gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -555,6 +556,7 @@ function animation(type, curr) {
                 renderEnvObjects(poss, [food, theta_food]);
 
                 updateSnakeEnv(environment, snakeList.head);
+                checkLose();
                 window.requestAnimationFrame(render);
             } else {
                 gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -656,6 +658,7 @@ function animation(type, curr) {
                     renderEnvObjects(poss, [food, theta_food]);
                     
                     updateSnakeEnv(environment, snakeList.head);
+                    checkLose();
                     window.requestAnimationFrame(render);
                 } else {
                     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -689,6 +692,14 @@ function animation(type, curr) {
     }
 }
 
+function checkLose() {
+    if (environment[snake_head.pos[0]][snake_head.pos[1]].element == PIRAMID || environment[snake_head.pos[0]][snake_head.pos[1]].element == SNAKEBODY || 
+            environment[snake_head.pos[0]][snake_head.pos[1]].element == SNAKETAIL) {
+        alert("You lose");
+        window.location.reload(false);
+    }
+}
+
 function render() {
 
     if (leftKeyPressed) {
@@ -708,13 +719,7 @@ function render() {
     }
 
     // animation(FORWARD, 0);
-
-    if (environment[snake_head.pos[0]][snake_head.pos[1]].element == PIRAMID || environment[snake_head.pos[0]][snake_head.pos[1]].element == SNAKEBODY || 
-            environment[snake_head.pos[0]][snake_head.pos[1]].element == SNAKETAIL) {
-        alert("You lose");
-        window.location.reload(false);
-        return;
-    }
+    
 
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     renderEnv();
