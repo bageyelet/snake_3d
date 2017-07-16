@@ -235,7 +235,7 @@ function bindButtons() {
 
 window.onload = function init() {
     canvas = document.getElementById( "gl-canvas" );
-    canvas.width = window.innerWidth-20;
+    canvas.width = window.innerWidth-35;
     canvas.height = window.innerHeight-250;
     canvas.style.display = "block";
 
