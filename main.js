@@ -2,12 +2,10 @@
 var canvas; var program;
 var stats;
 
-var square_size = 1.0;
-var tile_size_max = 0.25;
-var tile_size_min = 0.25;
+var points = 0;
 
-var env_size_w = 25;
-var env_size_h = 25;
+var env_size_w = 16;
+var env_size_h = 16;
 var poss;
 var food; var theta_food = 0;
 
@@ -16,7 +14,8 @@ var snake_head;
 var snakeList = new List();
 var facing_direction = NORTH;
 
-var curr_position = [Math.ceil(env_size_w/2), Math.ceil(env_size_h/2)];
+//var curr_position = [Math.ceil(env_size_w/2), Math.ceil(env_size_h/2)];
+var curr_position = [1, 4];
 var at_eye  = vec3(curr_position[0]*tile_size_max + tile_size_min/2, 0.0 , curr_position[1]*tile_size_max + tile_size_min/2);
 var eye_pos = vec3(at_eye[0], 1.25, at_eye[2]-2.0);
 var up_eye  = vec3(0.0, 1.0 , 0.0);
@@ -70,18 +69,19 @@ function renderEnv() {
     gl.uniform4fv( uDiffuseProduct, flatten(squareDiffuseProduct));
     gl.uniform4fv( uSpecularProduct, flatten(squareSpecularProduct));
     gl.uniform1f( uShininess, squareShininess);
-    gl.uniform1i(uText0, WHITE_SQUARE_TEXTURES);
-    var scalematrix = scalem(tile_size_min,1.0,tile_size_min);
+    gl.uniform1i( uText0, WHITE_SQUARE_TEXTURES);
+    //var scalematrix = scalem(tile_size_min,1.0,tile_size_min);
 
     for (var i=0; i<env_size_w; i++) {
         for (var j=0; j<env_size_h; j++) {
-            if (food[0][0] == i && food[0][1] == j || food[1][0] == i && food[1][1] == j) {
+            if (food[0][0] == i && food[0][1] == j) {
                 gl.uniform4fv( uColor, GREEN);
-                renderTile(mult(translate(tile_size_min/2 + tile_size_max*i , 0.0, tile_size_min/2 + tile_size_max*j), scalematrix));
+                //renderTile(mult(translate(tile_size_min/2 + tile_size_max*i , 0.0, tile_size_min/2 + tile_size_max*j), scalematrix));
             } else {
                 gl.uniform4fv( uColor, environment[i][j].color);
-                renderTile(mult(translate(tile_size_min/2 + tile_size_max*i , 0.0, tile_size_min/2 + tile_size_max*j), scalematrix));
+                //renderTile(mult(translate(tile_size_min/2 + tile_size_max*i , 0.0, tile_size_min/2 + tile_size_max*j), scalematrix));
             }
+            renderTile(environment[i][j].modelView);
         }
     }
 }
@@ -296,8 +296,6 @@ window.onload = function init() {
 
     var allTextures = squareTexCoordsArray.concat(piramidTexCoordsArray).concat(parallelepipedTexCoordsArray).concat(snakeheadTexCoordsArray)
                         .concat(snakebodyTexCoordsArray).concat(snaketailTexCoordsArray);
-    // for (var i=0; i<400; i++)
-    //     allTextures.push(vec2(0,0));
 
     tBuffer = gl.createBuffer();
     gl.bindBuffer( gl.ARRAY_BUFFER, tBuffer);
@@ -316,34 +314,37 @@ window.onload = function init() {
     initializePositionUpdater();
 
     poss = []; var k = 0;
-    for (var i=0; i<env_size_w; i++) {
-        poss[k] = [i, 0]; k+=1;
-        poss[k] = [i, env_size_h-1]; k+=1;
-    } for (var i=1; i<env_size_h-1; i++) {
-        poss[k] = [0, i]; k+=1;
-        poss[k] = [env_size_w-1, i]; k+=1;
-    }
+    // for (var i=0; i<env_size_w; i++) {
+    //     poss[k] = [i, 0]; k+=1;
+    //     poss[k] = [i, env_size_h-1]; k+=1;
+    // } for (var i=1; i<env_size_h-1; i++) {
+    //     poss[k] = [0, i]; k+=1;
+    //     poss[k] = [env_size_w-1, i]; k+=1;
+    // }
+    poss.push([Math.round(env_size_w/2)-1, Math.round(env_size_h/2)-1]);
+    poss.push([Math.round(env_size_w/2)  , Math.round(env_size_h/2)-1]);
+    poss.push([Math.round(env_size_w/2)-1, Math.round(env_size_h/2)  ]);
+    poss.push([Math.round(env_size_w/2)  , Math.round(env_size_h/2)  ]);    
 
     food = [];
-    food.push([8, 10]);
-    food.push([11, 16]);
 
     environment = build_env_matrix(env_size_w, env_size_h, food, poss);
 
+    food = [generateFood(env_size_w, env_size_h, environment)];
+
     snake_head = {};
     snake_head.type = SNAKEHEAD;
-    snake_head.pos = [Math.ceil(env_size_w/2), Math.ceil(env_size_h/2)];
+    snake_head.pos = [1, 4];
     snake_head.angle = 0;
     snake_head.direction = NORTH;
     snake_head.anim = null;
 
-    snakeList.add({type:SNAKETAIL, pos:[snake_head.pos[0], snake_head.pos[1]-6], angle:snake_head.angle, direction:snake_head.direction, anim: FORWARD});
-    snakeList.add({type:SNAKEBODY, pos:[snake_head.pos[0], snake_head.pos[1]-5], angle:snake_head.angle, direction:snake_head.direction, anim: FORWARD});
-    snakeList.add({type:SNAKEBODY, pos:[snake_head.pos[0], snake_head.pos[1]-4], angle:snake_head.angle, direction:snake_head.direction, anim: FORWARD});
-    snakeList.add({type:SNAKEBODY, pos:[snake_head.pos[0], snake_head.pos[1]-3], angle:snake_head.angle, direction:snake_head.direction, anim: FORWARD});
-    snakeList.add({type:SNAKEBODY, pos:[snake_head.pos[0], snake_head.pos[1]-2], angle:snake_head.angle, direction:snake_head.direction, anim: FORWARD});
+    snakeList.add({type:SNAKETAIL, pos:[snake_head.pos[0], snake_head.pos[1]-2], angle:snake_head.angle, direction:snake_head.direction, anim: FORWARD});
     snakeList.add({type:SNAKEBODY, pos:[snake_head.pos[0], snake_head.pos[1]-1], angle:snake_head.angle, direction:snake_head.direction, anim: FORWARD});
     snakeList.add(snake_head);    
+
+    initializeOldPos(snakeList.head);
+    updateSnakeEnv(environment, snakeList.head);
 
     renderEnv();
     renderEnvObjects(poss, [food, 0]);
@@ -372,6 +373,7 @@ function animation(type, curr) {
                 switch (snake_head.old_direction) {
                     case NORTH:
                         snake_head.direction = WEST;
+                        snake_head.future_position = [snake_head.pos[0]+1, snake_head.pos[1]];
                         inc_pos.x = linear_interpolation(speed, 0, max_curr, 0, 1);
                         inc_pos.y = 0;
                         inc_tran.x = linear_interpolation(speed, 0, max_curr, 0, tile_size_max);
@@ -379,6 +381,7 @@ function animation(type, curr) {
                         break;
                     case SOUTH:
                         snake_head.direction = EAST;
+                        snake_head.future_position = [snake_head.pos[0]-1, snake_head.pos[1]];
                         inc_pos.x = -linear_interpolation(speed, 0, max_curr, 0, 1);
                         inc_pos.y = 0;
                         inc_tran.x = -linear_interpolation(speed, 0, max_curr, 0, tile_size_max);
@@ -386,6 +389,7 @@ function animation(type, curr) {
                         break;
                     case EAST:
                         snake_head.direction = NORTH;
+                        snake_head.future_position = [snake_head.pos[0], snake_head.pos[1]+1];
                         inc_pos.x = 0;
                         inc_pos.y = linear_interpolation(speed, 0, max_curr, 0, 1);
                         inc_tran.x = 0;
@@ -393,6 +397,7 @@ function animation(type, curr) {
                         break;
                     case WEST:
                         snake_head.direction = SOUTH;
+                        snake_head.future_position = [snake_head.pos[0], snake_head.pos[1]-1];
                         inc_pos.x = 0;
                         inc_pos.y = -linear_interpolation(speed, 0, max_curr, 0, 1);
                         inc_tran.x = 0;
@@ -400,6 +405,18 @@ function animation(type, curr) {
                         break;
                     default:
                         throw "animation(): facing_direction corrupted";
+                }
+
+                if (checkLose()) {
+                    alert("you lose");
+                    window.location.reload(false);
+                }
+                if (checkFood()) {
+                    points += 1;
+                    updatePoints(points);
+                    snakeList.copySecond();
+                    snakeList.head.next.next.data.copyied = true;
+                    food = [generateFood(env_size_w, env_size_h, environment)];
                 }
 
                 inc_rot = linear_interpolation(speed, 0, max_curr, 0, 90);
@@ -445,7 +462,6 @@ function animation(type, curr) {
                 renderEnvObjects(poss, [food, theta_food]);
 
                 updateSnakeEnv(environment, snakeList.head);
-                checkLose();
                 window.requestAnimationFrame(render);
             } else {
                 gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -484,6 +500,7 @@ function animation(type, curr) {
                 switch (snake_head.old_direction) {
                     case NORTH:
                         snake_head.direction = EAST;
+                        snake_head.future_position = [snake_head.pos[0]-1, snake_head.pos[1]];
                         inc_pos.x = -linear_interpolation(speed, 0, max_curr, 0, 1);
                         inc_pos.y = 0;
                         inc_tran.x = -linear_interpolation(speed, 0, max_curr, 0, tile_size_max);
@@ -491,6 +508,7 @@ function animation(type, curr) {
                         break;
                     case SOUTH:
                         snake_head.direction = WEST;
+                        snake_head.future_position = [snake_head.pos[0]+1, snake_head.pos[1]];
                         inc_pos.x = linear_interpolation(speed, 0, max_curr, 0, 1);
                         inc_pos.y = 0;
                         inc_tran.x = linear_interpolation(speed, 0, max_curr, 0, tile_size_max);
@@ -498,6 +516,7 @@ function animation(type, curr) {
                         break;
                     case EAST:
                         snake_head.direction = SOUTH;
+                        snake_head.future_position = [snake_head.pos[0], snake_head.pos[1]-1];
                         inc_pos.x = 0;
                         inc_pos.y = -linear_interpolation(speed, 0, max_curr, 0, 1);
                         inc_tran.x = 0;
@@ -505,6 +524,7 @@ function animation(type, curr) {
                         break;
                     case WEST:
                         snake_head.direction = NORTH;
+                        snake_head.future_position = [snake_head.pos[0], snake_head.pos[1]+1];
                         inc_pos.x = 0;
                         inc_pos.y = linear_interpolation(speed, 0, max_curr, 0, 1);
                         inc_tran.x = 0;
@@ -512,6 +532,18 @@ function animation(type, curr) {
                         break;
                     default:
                         throw "animation(): facing_direction corrupted";
+                }
+
+                if (checkLose()) {
+                    alert("you lose");
+                    window.location.reload(false);
+                }
+                if (checkFood()) {
+                    points += 1;
+                    updatePoints(points);
+                    snakeList.copySecond();
+                    snakeList.head.next.next.data.copyied = true;
+                    food = [generateFood(env_size_w, env_size_h, environment)];
                 }
 
                 inc_rot = -linear_interpolation(speed, 0, max_curr, 0, 90);
@@ -556,7 +588,6 @@ function animation(type, curr) {
                 renderEnvObjects(poss, [food, theta_food]);
 
                 updateSnakeEnv(environment, snakeList.head);
-                checkLose();
                 window.requestAnimationFrame(render);
             } else {
                 gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -594,24 +625,28 @@ function animation(type, curr) {
                     snake_head.anim = FORWARD;
                     switch (snake_head.old_direction) {
                         case WEST:
+                            snake_head.future_position = [snake_head.pos[0]+1, snake_head.pos[1]];
                             inc_pos.x = linear_interpolation(speed, 0, max_curr/2, 0, 1);
                             inc_pos.y = 0;
                             inc_tran.x = linear_interpolation(speed, 0, max_curr/2, 0, tile_size_max);
                             inc_tran.y = 0;
                             break;
                         case EAST:
+                            snake_head.future_position = [snake_head.pos[0]-1, snake_head.pos[1]];
                             inc_pos.x = -linear_interpolation(speed, 0, max_curr/2, 0, 1);
                             inc_pos.y = 0;
                             inc_tran.x = -linear_interpolation(speed, 0, max_curr/2, 0, tile_size_max);
                             inc_tran.y = 0;
                             break;
                         case NORTH:
+                            snake_head.future_position = [snake_head.pos[0], snake_head.pos[1]+1];
                             inc_pos.x = 0;
                             inc_pos.y = linear_interpolation(speed, 0, max_curr/2, 0, 1);
                             inc_tran.x = 0;
                             inc_tran.y = linear_interpolation(speed, 0, max_curr/2, 0, tile_size_max);
                             break;
                         case SOUTH:
+                            snake_head.future_position = [snake_head.pos[0], snake_head.pos[1]-1];
                             inc_pos.x = 0;
                             inc_pos.y = -linear_interpolation(speed, 0, max_curr/2, 0, 1);
                             inc_tran.x = 0;
@@ -620,6 +655,18 @@ function animation(type, curr) {
                         default:
                             throw "animation(): facing_direction corrupted";
                     }
+                    if (checkLose()) {
+                        alert("you lose");
+                        window.location.reload(false);
+                    }
+                    if (checkFood()) {
+                        points += 1;
+                        updatePoints(points);
+                        snakeList.copySecond();
+                        snakeList.head.next.next.data.copyied = true;
+                        food = [generateFood(env_size_w, env_size_h, environment)];
+                    }
+
                     tot_tran.x=0; tot_tran.y=0;
                 }
                 if (curr >= max_curr) {
@@ -658,7 +705,6 @@ function animation(type, curr) {
                     renderEnvObjects(poss, [food, theta_food]);
                     
                     updateSnakeEnv(environment, snakeList.head);
-                    checkLose();
                     window.requestAnimationFrame(render);
                 } else {
                     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -693,11 +739,20 @@ function animation(type, curr) {
 }
 
 function checkLose() {
-    if (environment[snake_head.pos[0]][snake_head.pos[1]].element == PIRAMID || environment[snake_head.pos[0]][snake_head.pos[1]].element == SNAKEBODY || 
-            environment[snake_head.pos[0]][snake_head.pos[1]].element == SNAKETAIL) {
-        alert("You lose");
-        window.location.reload(false);
+    if (snake_head.future_position[0] >= env_size_w || snake_head.future_position[1] >= env_size_h || snake_head.future_position[0] < 0 || snake_head.
+            future_position[1] < 0)
+        return true;
+    var head_env = environment[snake_head.future_position[0]][snake_head.future_position[1]].element;
+    if ( head_env == PIRAMID || head_env == SNAKEBODY || head_env == SNAKETAIL ) {
+        return true;
     }
+    return false;
+}
+
+function checkFood() {
+    if (environment[snake_head.future_position[0]][snake_head.future_position[1]].element == PARALLELEPIPED)
+        return true;
+    return false;
 }
 
 function render() {

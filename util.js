@@ -137,9 +137,26 @@ function build_env_matrix(env_w, env_h, food, obstacles) {
             el.color = vec4( linear_interpolation(i, 0, env_w, 0.1, 0.9), 
                              linear_interpolation(i+j, 0, env_w+env_h, 0.1, 0.9), 
                              linear_interpolation(j, 0, env_h, 0.1, 0.9), 1.0);
+            var square_scalematrix = scalem(tile_size_min,1.0,tile_size_min);
+            el.modelView = mult(translate(tile_size_min/2 + tile_size_max*i , 0.0, tile_size_min/2 + tile_size_max*j), square_scalematrix);
             ris[i][j] = el;
         }
         
     }
     return ris;
+}
+
+function generateFood(env_w, env_h, env) {
+    var fpos = [];
+    do {
+        fpos[0] = Math.round(Math.random()*100) % env_w;
+        fpos[1] = Math.round(Math.random()*100) % env_h;
+        // console.log("ITERATION", fpos);
+    } while (env[fpos[0]][fpos[1]].element != VOID);
+    env[fpos[0]][fpos[1]].element = PARALLELEPIPED;
+    return fpos;
+}
+
+function updatePoints(points) {
+    document.getElementById("points").innerHTML = "POINTS: "+points;
 }

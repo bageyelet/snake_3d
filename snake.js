@@ -93,6 +93,21 @@ function initializePositionUpdater() {
     }
 }
 
+// function copySnakeData(from, to) {
+//     to.pos = [];
+//     to.pos[0] = from.pos[0]; to.pos[1] = from.pos[1];
+//     to.ange = from.angle;
+//     to.direction = from.direction;
+//     to.anim = from.anim;
+//     to.old_pos = [];
+//     to.old_pos[0] = from.old_pos[0]; to.old_pos[1] = from.old_pos[1];
+//     to.old_angle = from.old_angle;
+//     to.old_direction = from.old_direction;
+//     to.old_anim = from.od_anim;
+//     to.copyied = from.copyied;
+//     to.type = from.type;
+// }
+
 function initializeOldPos(snake) {
     snake.data.old_pos = snake.data.pos.slice();
     snake.data.old_angle = snake.data.angle;
@@ -104,8 +119,12 @@ function initializeOldPos(snake) {
 
 function updateSnakeEnv(env, snake) {
     var posx = Math.round(snake.data.pos[0]); var posy = Math.round(snake.data.pos[1]);
-    if (env[posx][posy].element != PIRAMID)
+    var oldposx = Math.round(snake.data.old_pos[0]); var oldposy = Math.round(snake.data.old_pos[1]);
+    if (env[posx][posy].element != PIRAMID) {
         env[posx][posy].element = snake.data.type;
+        env[oldposx][oldposy].element = VOID;
+    }
+    snake.data.copyied = false;
     if (snake.next != null )
         updateSnakeEnv(env, snake.next);
 }
@@ -398,6 +417,8 @@ function updateSnakePositions(snake_node, i) {
     if (prev.data.type == SNAKEHEAD) {
         updateFirstBodyPosition(snake_node, i);
     } else {
+        if (snake_node.data.copyied)
+            return;
         switch (prev.data.old_anim) {
             case FORWARD:
                 switch (prev.data.old_direction) {

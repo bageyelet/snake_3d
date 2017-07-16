@@ -17,6 +17,8 @@ var squareNormalsArray = [
     vec4( 0.0, 1.0, 0.0, 0.0)
 ];
 
+var square_scalematrix = scalem(tile_size_min,1.0,tile_size_min);
+
 var squareTexCoordsArray = [
     texCoord[0], texCoord[1],
     texCoord[2], texCoord[3]

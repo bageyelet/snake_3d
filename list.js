@@ -2,6 +2,13 @@ function Node(data) {
     this.data = data;
     this.next = null;
     this.prev = null;
+    this.clone = function() {
+        var ris = new Node(null);
+        ris.data = JSON.parse(JSON.stringify( this.data )); 
+        ris.next = this.next;
+        ris.prev = this.prev;
+        return ris;
+    }
 }
 
 function List() {
@@ -18,6 +25,15 @@ function List() {
             tmp.prev = node;
         this._length++;
         return node;
+    }
+    this.copySecond = function() {
+        if (this.head==null) throw "copySecond(): head is null";
+        if (this.head.next==null) throw "copySecond(): head.next is null";
+        var second = this.head.next;
+        var new_second = second.clone();
+        new_second.next = second;
+        second.prev = new_second;
+        this.head.next = new_second;
     }
     this.next = function() {
         if (this._nextPointer == null)
