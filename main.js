@@ -326,11 +326,9 @@ window.onload = function init() {
     poss.push([Math.round(env_size_w/2)-1, Math.round(env_size_h/2)  ]);
     poss.push([Math.round(env_size_w/2)  , Math.round(env_size_h/2)  ]);    
 
-    food = [];
+    food = [[3, 3]];
 
     environment = build_env_matrix(env_size_w, env_size_h, food, poss);
-
-    food = [generateFood(env_size_w, env_size_h, environment)];
 
     snake_head = {};
     snake_head.type = SNAKEHEAD;
@@ -350,6 +348,7 @@ window.onload = function init() {
     renderEnvObjects(poss, [food, 0]);
 
     bindButtons();
+    anim_counter=0; anim=false; cur_anim = null;
     render();
 }
 
@@ -462,7 +461,8 @@ function animation(type, curr) {
                 renderEnvObjects(poss, [food, theta_food]);
 
                 updateSnakeEnv(environment, snakeList.head);
-                window.requestAnimationFrame(render);
+                anim_counter=0; anim=false; cur_anim = null;
+                // window.requestAnimationFrame(render);
             } else {
                 gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
@@ -487,9 +487,9 @@ function animation(type, curr) {
                 snake_head.pos[1] += inc_pos.y;
                 snake_head.angle += inc_rot;
 
-                window.requestAnimationFrame(function() {
-                    animation(ROTATION_LEFT, curr+speed);
-                });
+                // window.requestAnimationFrame(function() {
+                //     animation(ROTATION_LEFT, curr+speed);
+                // });
                 
             }
             break;
@@ -588,7 +588,8 @@ function animation(type, curr) {
                 renderEnvObjects(poss, [food, theta_food]);
 
                 updateSnakeEnv(environment, snakeList.head);
-                window.requestAnimationFrame(render);
+                anim_counter=0; anim=false; cur_anim = null;
+                // window.requestAnimationFrame(render);
             } else {
                 gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
@@ -613,9 +614,9 @@ function animation(type, curr) {
                 snake_head.pos[1] += inc_pos.y;
                 snake_head.angle += inc_rot;
 
-            window.requestAnimationFrame(function() {
-                animation(ROTATION_RIGHT, curr+speed);
-            });
+            // window.requestAnimationFrame(function() {
+            //     animation(ROTATION_RIGHT, curr+speed);
+            // });
 
             }
             break;
@@ -705,7 +706,8 @@ function animation(type, curr) {
                     renderEnvObjects(poss, [food, theta_food]);
                     
                     updateSnakeEnv(environment, snakeList.head);
-                    window.requestAnimationFrame(render);
+                    anim_counter=0; anim=false; cur_anim = null;
+                    // window.requestAnimationFrame(render);
                 } else {
                     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
@@ -728,9 +730,9 @@ function animation(type, curr) {
                     snake_head.pos[0] += inc_pos.x;
                     snake_head.pos[1] += inc_pos.y;
            
-                    window.requestAnimationFrame(function() {
-                        animation(FORWARD, curr+2*speed);
-                    });
+                    // window.requestAnimationFrame(function() {
+                    //     animation(FORWARD, curr+2*speed);
+                    // });
                 }
             break;
         default:
@@ -755,31 +757,50 @@ function checkFood() {
     return false;
 }
 
+var anim = false; var cur_anim = null; var anim_counter = 0;
 function render() {
 
-    if (leftKeyPressed) {
-        leftKeyPressed = false;
-        animation(ROTATION_LEFT, 0);
-        return;
-    }
-    if (rightKeyPressed) {
-        rightKeyPressed = false;
-        animation(ROTATION_RIGHT, 0);
-        return;
-    }
-    if (upKeyPressed) {
-        upKeyPressed = false;
-        animation(FORWARD, 0);
-        return;
-    }
+    if (anim==false) {
 
-    // animation(FORWARD, 0);
-    
+        if (leftKeyPressed) {
+            anim = true;
+            anim_counter = 0;
+            leftKeyPressed = false;
+            cur_anim = ROTATION_LEFT;
+            animation(ROTATION_LEFT, anim_counter);
+        } else if (rightKeyPressed) {
+            anim = true;
+            anim_counter = 0;
+            rightKeyPressed = false;
+            cur_anim = ROTATION_RIGHT;
+            animation(ROTATION_RIGHT, anim_counter);
+        } else if (upKeyPressed) {
+            anim = true;
+            anim_counter = 0;
+            upKeyPressed = false;
+            cur_anim = FORWARD;
+            animation(FORWARD, anim_counter);
+        } else {
+            gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+            renderEnv();
+            theta_food = (theta_food + 1) % 360;
+            renderEnvObjects(poss, [food, theta_food]);
+            // anim = true;
+            // anim_counter = 0;
+            // upKeyPressed = false;
+            // cur_anim = FORWARD;
+            // animation(FORWARD, anim_counter);
+        }
+    } else {
+        if (cur_anim == FORWARD)
+            anim_counter+=2*speed;
+        else
+            anim_counter+=speed;
+        animation(cur_anim, anim_counter);
+    }
+    setTimeout(function() {
+        window.requestAnimationFrame(render);
+    }, 1000 / 50);
 
-    gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    renderEnv();
-    theta_food = (theta_food + 1) % 360;
-    renderEnvObjects(poss, [food, theta_food]);
-
-    window.requestAnimationFrame(render);
+    // window.requestAnimationFrame(render);
 }
