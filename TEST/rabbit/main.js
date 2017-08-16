@@ -13,8 +13,12 @@ theta[RABBIT_ARM_L] = 20; theta[RABBIT_ARM_R] = 20;
 theta[RABBIT_HEAD] = 20;
 theta[RABBIT_LEG_DOWN_L] = 20; theta[RABBIT_LEG_DOWN_R] = 20;
 theta[RABBIT_EAR_L] = 15; theta[RABBIT_EAR_R] = -15;
+
+var facing_angle = 0;
+
+var pos_body = [0, 1, 0];
  
-rabbit = []
+rabbit = [];
 
 var animation = false; var reset = false;
 
@@ -67,7 +71,12 @@ function initNode(id) {
     var m = mat4();
     switch(id) {
         case RABBIT_BODY:
-            m = rotate(theta[RABBIT_BODY], [1,0,0]);
+            m = mult( translate(
+                        pos_body[0],
+                        pos_body[1],
+                        pos_body[2]),
+                      rotate(facing_angle, [0,1,0]));
+            m = mult( m, rotate(theta[RABBIT_BODY], [1,0,0]));
             rabbit[RABBIT_BODY] = createNode(m, render_body, null, RABBIT_LEG_UP_L);
             break;
         case RABBIT_LEG_UP_L:
@@ -180,7 +189,7 @@ function initButtons() {
         cameraMatrix = lookAt(eye, at , up);
         gl.uniformMatrix4fv( gl.getUniformLocation( program, "cameraMatrix"), false, flatten(cameraMatrix) );
     };
-    document.getElementById("start_animation").onclick = function(){animation = !animation;};
+    document.getElementById("start_animation").onclick = function(){phase =1;};
     document.getElementById("reset").onclick = function(){reset = true;};
 }
 
@@ -230,11 +239,139 @@ window.onload = function init() {
 
     initButtons();
     for (var i=0; i<=20; i++) initNode(i);
+
+    var event = {}; event.target = {}; event.target.value = 50;
+    document.getElementById("camera_slider_xz").onchange(event);
+    event = {}; event.target = {}; event.target.value = 30;
+    document.getElementById("camera_slider_yz").onchange(event);
     render();
 }
 
+var phase = 0; var count = 0; var max = 19;
+var inc_body_1 = linear_interpolation(1, 0, max+1, -20, -5);
+var inc_feet_1 = linear_interpolation(1, 0, max+1, 20, 5);
+var inc_arm_1  = linear_interpolation(1, 0, max+1, 20, -40);
+var inc_head_1 = linear_interpolation(1, 0, max+1, 20, 5);
+
+var inc_body_2 = linear_interpolation(1, 0, max+1, -5, -40);
+var inc_feet_2 = linear_interpolation(1, 0, max+1, 5, 60);
+var inc_arm_2  = linear_interpolation(1, 0, max+1, -40, 40);
+var inc_head_2 = linear_interpolation(1, 0, max+1, 5, 20);
+
+var inc_pos_x = linear_interpolation(1, 0, 2*(max+1), 0, 0.2);
+var inc_pos_y = linear_interpolation(1, 0, max+1, 0, 0.2);
+
+var inc_body_3 = linear_interpolation(1, 0, max+1, -40, -20);
+var inc_feet_3 = linear_interpolation(1, 0, max+1, 60, 20);
+var inc_arm_3  = linear_interpolation(1, 0, max+1, 40, 20);
+//var inc_head_3 = linear_interpolation(1, 0, max+1, 20, 20);
+
 function render() {
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    switch (phase) {
+        case 1:
+            if (count > max) {
+                phase=2;
+                count=0;
+                theta[RABBIT_BODY] = -5;
+                theta[RABBIT_LEG_DOWN_L] = 5;
+                theta[RABBIT_LEG_DOWN_R] = 5;
+                theta[RABBIT_ARM_L] = -40;
+                theta[RABBIT_ARM_R] = -40;
+                theta[RABBIT_HEAD] = 5;
+                for (var i=0; i<=10; i++) {
+                    initNode(i);
+                }
+                console.log(theta[RABBIT_BODY]);
+            } else {
+                theta[RABBIT_BODY] += inc_body_1;
+                theta[RABBIT_LEG_DOWN_L] += inc_feet_1;
+                theta[RABBIT_LEG_DOWN_R] += inc_feet_1;
+                theta[RABBIT_ARM_L] += inc_arm_1;
+                theta[RABBIT_ARM_R] += inc_arm_1;
+                theta[RABBIT_HEAD] += inc_head_1;
+                for (var i=0; i<=10; i++) {
+                    initNode(i);
+                }
+            }
+            count += 1;
+            break;
+        case 2:
+            if (count > max) {
+                phase=3;
+                count=0;
+                theta[RABBIT_BODY] = -40;
+                theta[RABBIT_LEG_DOWN_L] = 60;
+                theta[RABBIT_LEG_DOWN_R] = 60;
+                theta[RABBIT_ARM_L] = 40;
+                theta[RABBIT_ARM_R] = 40;
+                theta[RABBIT_HEAD] = 20;
+
+                //pos_body[2] = 0.2;
+                //pos_body[1] = 0;
+
+                for (var i=0; i<=10; i++) {
+                    initNode(i);
+                }
+                console.log(theta[RABBIT_BODY]);
+            } else {
+                theta[RABBIT_BODY] += inc_body_2;
+                theta[RABBIT_LEG_DOWN_L] += inc_feet_2;
+                theta[RABBIT_LEG_DOWN_R] += inc_feet_2;
+                theta[RABBIT_ARM_L] += inc_arm_2;
+                theta[RABBIT_ARM_R] += inc_arm_2;
+                theta[RABBIT_HEAD] += inc_head_2;
+                pos_body[2] += inc_pos_x;
+                pos_body[1] += inc_pos_y;
+                
+                for (var i=0; i<=10; i++) {
+                    initNode(i);
+                }
+            }
+            count += 1;
+            break;
+        case 3:
+            if (count > max) {
+                phase=0;
+                count=0;
+                theta[RABBIT_BODY] = -20;
+                theta[RABBIT_LEG_DOWN_L] = 20;
+                theta[RABBIT_LEG_DOWN_R] = 20;
+                theta[RABBIT_ARM_L] = 20;
+                theta[RABBIT_ARM_R] = 20;
+                theta[RABBIT_HEAD] = 20;
+                for (var i=0; i<=10; i++) {
+                    initNode(i);
+                }
+                console.log(theta[RABBIT_BODY]);
+            } else {
+                theta[RABBIT_BODY] += inc_body_3;
+                theta[RABBIT_LEG_DOWN_L] += inc_feet_3;
+                theta[RABBIT_LEG_DOWN_R] += inc_feet_3;
+                theta[RABBIT_ARM_L] += inc_arm_3;
+                theta[RABBIT_ARM_R] += inc_arm_3;
+                // theta[RABBIT_HEAD] += inc_head_3;
+                pos_body[2] += inc_pos_x;
+                pos_body[1] -= inc_pos_y;
+                for (var i=0; i<=10; i++) {
+                    initNode(i);
+                }
+            }
+            count += 1;
+            break;
+        default:
+            break;
+    }
+
+    traverse(RABBIT_BODY);
+    window.requestAnimFrame(render);
+    facing_angle += 1; 
+    for (var i=0; i<=10; i++) {
+        initNode(i);
+    }
+
+
     // if (animation && theta[0] < 90)
     //     for (var i=0; i<=14; i++) {
     //         theta[i] += 0.5;
@@ -249,6 +386,6 @@ function render() {
     //     animation = false;
     // }
 
-    traverse(RABBIT_BODY);
-    window.requestAnimFrame(render);
+    // traverse(RABBIT_BODY);
+    // window.requestAnimFrame(render);
 }

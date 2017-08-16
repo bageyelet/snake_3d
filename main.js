@@ -24,7 +24,7 @@ var cameraMatrix; var projectionMatrix;
 var vBuffer; var vPosition;
 var nBuffer; var vNormal;
 var tBuffer; var vTexCoord;
-var buffer_indexes = {};
+
 var uColor;
 var uModelViewMatrix; var uProjectionMatrix; var uCameraMatrix;
 var uDiffuseProduct; var uSpecularProduct; var uShininess;
@@ -77,6 +77,8 @@ function renderEnv() {
             if (food[0][0] == i && food[0][1] == j) {
                 gl.uniform4fv( uColor, GREEN);
                 //renderTile(mult(translate(tile_size_min/2 + tile_size_max*i , 0.0, tile_size_min/2 + tile_size_max*j), scalematrix));
+            } else if (rabbit_pos[0][0] == i && rabbit_pos[0][1] == j) {
+                gl.uniform4fv( uColor, WHITE);
             } else {
                 gl.uniform4fv( uColor, environment[i][j].color);
                 //renderTile(mult(translate(tile_size_min/2 + tile_size_max*i , 0.0, tile_size_min/2 + tile_size_max*j), scalematrix));
@@ -179,6 +181,16 @@ function renderObject(type, positions, theta) {
                 gl.uniformMatrix4fv(uModelViewMatrix, false, flatten(modelViewMatrix));
                 gl.drawArrays(gl.TRIANGLES, buffer_indexes[SNAKETAIL], lenSnaketailArray);
             }
+            break;
+
+        case RABBIT:
+            gl.uniform4fv( uColor, WHITE);
+            gl.uniform4fv( uDiffuseProduct, flatten(parallelepipedDiffuseProduct));
+            gl.uniform4fv( uSpecularProduct, flatten(parallelepipedSpecularProduct));
+            gl.uniform1f( uShininess, parallelepipedShininess);
+
+            gl.uniform1i(uText0, WHITE_SQUARE_TEXTURES);
+            renderRabbit();
             break;
         default:
             throw "renderObject(): wrong type";
@@ -305,9 +317,6 @@ window.onload = function init() {
     gl.vertexAttribPointer( vTexCoord, 2, gl.FLOAT, false, 0, 0 );
     gl.enableVertexAttribArray( vTexCoord );
 
-    buffer_indexes[SQUARE] = 0; buffer_indexes[PIRAMID] = 4; buffer_indexes[PARALLELEPIPED] = 22; 
-    buffer_indexes[SNAKEHEAD] = 58; buffer_indexes[SNAKEBODY] = 94; buffer_indexes[SNAKETAIL] = 130;
-
     initSquareWhiteTexture(gl);
     initTriangleWhiteTexture(gl);
 
@@ -327,8 +336,10 @@ window.onload = function init() {
     poss.push([Math.round(env_size_w/2)  , Math.round(env_size_h/2)  ]);    
 
     food = [[3, 3]];
+    rabbit_pos = [[3, 4]];
+    initRabbitStuff(uModelViewMatrix, gl);
 
-    environment = build_env_matrix(env_size_w, env_size_h, food, poss);
+    environment = build_env_matrix(env_size_w, env_size_h, food, poss, rabbit_pos);
 
     snake_head = {};
     snake_head.type = SNAKEHEAD;
@@ -346,6 +357,7 @@ window.onload = function init() {
 
     renderEnv();
     renderEnvObjects(poss, [food, 0]);
+    renderObject(RABBIT, rabbit);
 
     bindButtons();
     anim_counter=0; anim=false; cur_anim = null;
@@ -768,18 +780,21 @@ function render() {
             leftKeyPressed = false;
             cur_anim = ROTATION_LEFT;
             animation(ROTATION_LEFT, anim_counter);
+            animateRabbit(anim_counter);
         } else if (rightKeyPressed) {
             anim = true;
             anim_counter = 0;
             rightKeyPressed = false;
             cur_anim = ROTATION_RIGHT;
             animation(ROTATION_RIGHT, anim_counter);
+            animateRabbit(anim_counter);
         } else if (upKeyPressed) {
             anim = true;
             anim_counter = 0;
             upKeyPressed = false;
             cur_anim = FORWARD;
             animation(FORWARD, anim_counter);
+            animateRabbit(anim_counter);
         } else {
             gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
             renderEnv();
@@ -796,8 +811,10 @@ function render() {
             anim_counter+=2*speed;
         else
             anim_counter+=speed;
+        animateRabbit(anim_counter);
         animation(cur_anim, anim_counter);
     }
+    renderObject(RABBIT, rabbit_pos);
     setTimeout(function() {
         window.requestAnimationFrame(render);
     }, 1000 / 50);

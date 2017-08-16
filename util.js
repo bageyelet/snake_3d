@@ -115,7 +115,7 @@ function abs(v) {
     else return -v;
 }
 
-function build_env_matrix(env_w, env_h, food, obstacles) {
+function build_env_matrix(env_w, env_h, food, obstacles, rabbit) {
     var ris = [];
     for (var i=0; i<env_w; i++) {
         ris.push([]);
@@ -131,6 +131,12 @@ function build_env_matrix(env_w, env_h, food, obstacles) {
             for (var k=0; k<obstacles.length; k++) {
                 if (obstacles[k][0] == i && obstacles[k][1] == j) {
                     el.element = PIRAMID;
+                    break;
+                }
+            }
+            for (var k=0; k<rabbit.length; k++) {
+                if (rabbit[k][0] == i && rabbit[k][1] == j) {
+                    el.element = RABBIT;
                     break;
                 }
             }
@@ -160,3 +166,19 @@ function generateFood(env_w, env_h, env) {
 function updatePoints(points) {
     document.getElementById("points").innerHTML = "POINTS: "+points;
 }
+
+// UTIL FUNCTIONS
+function createNode(transform, render, sibling, child){
+    var node = {
+    transform: transform,
+    render: render,
+    sibling: sibling,
+    child: child,
+    }
+    return node;
+}
+
+// Converts from degrees to radians.
+Math.radians = function(degrees) {
+  return degrees * Math.PI / 180;
+};

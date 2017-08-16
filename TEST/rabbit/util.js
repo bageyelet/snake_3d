@@ -13,7 +13,7 @@ var RABBIT_EAR_L        = 8;
 var RABBIT_EAR_R        = 9;
 var RABBIT_NOSE         = 10;
 
-var scale = 0.6;
+var scale = 0.1;
 
 var rabbit_body_dim = {};
 rabbit_body_dim.x = scale*0.5; rabbit_body_dim.y = scale*0.5; rabbit_body_dim.z = scale*0.8;
@@ -51,3 +51,9 @@ function createNode(transform, render, sibling, child){
 Math.radians = function(degrees) {
   return degrees * Math.PI / 180;
 };
+
+function linear_interpolation(v1, min1, max1, min2, max2) {
+    var v2;
+    v2 = v1 * ((max2-min2) / (max1 - min1));
+    return v2;
+}
