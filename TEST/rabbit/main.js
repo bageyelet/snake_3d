@@ -16,7 +16,7 @@ theta[RABBIT_EAR_L] = 15; theta[RABBIT_EAR_R] = -15;
 
 var facing_angle = 0;
 
-var pos_body = [0, 1, 0];
+var pos_body = [0, 0, 0];
  
 rabbit = [];
 
@@ -366,7 +366,7 @@ function render() {
 
     traverse(RABBIT_BODY);
     window.requestAnimFrame(render);
-    facing_angle += 1; 
+    //facing_angle += 1; 
     for (var i=0; i<=10; i++) {
         initNode(i);
     }

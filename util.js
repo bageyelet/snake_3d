@@ -152,14 +152,15 @@ function build_env_matrix(env_w, env_h, food, obstacles, rabbit) {
     return ris;
 }
 
-function generateFood(env_w, env_h, env) {
+function generateFood(env_w, env_h, env, rabbit) {
     var fpos = [];
     do {
         fpos[0] = Math.round(Math.random()*100) % env_w;
         fpos[1] = Math.round(Math.random()*100) % env_h;
         // console.log("ITERATION", fpos);
     } while (env[fpos[0]][fpos[1]].element != VOID);
-    env[fpos[0]][fpos[1]].element = PARALLELEPIPED;
+    if (!rabbit)
+        env[fpos[0]][fpos[1]].element = PARALLELEPIPED;
     return fpos;
 }
 

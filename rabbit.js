@@ -189,8 +189,6 @@ function renderRabbit() {
     traverse(RABBIT_BODY);
 }
 
-var phase = 0; 
-
 var inc_pos_x = linear_interpolation(speed, 0, max_curr, 0, tile_size_max);
 var inc_pos_y = linear_interpolation(speed, 0, 2*max_curr, 0, tile_size_max);
 
@@ -208,8 +206,9 @@ var inc_body_3 = linear_interpolation(speed, 0, max_curr/3, -40, -20);
 var inc_feet_3 = linear_interpolation(speed, 0, max_curr/3, 60, 20);
 var inc_arm_3  = linear_interpolation(speed, 0, max_curr/3, 40, 20);
 
-function animateRabbit(i) {
-    console.log("ciao", i);
+var inc_facing_angle = linear_interpolation(speed, 0, max_curr, 0, 90);
+
+function animateForward(i) {
     if (i==0) {
         switch (rabbit_facing_direction) {
             case NORTH:
@@ -217,10 +216,16 @@ function animateRabbit(i) {
                 rabbit_pos[0][1] += 1;
                 break;
             case SOUTH:
+                rabbit_pos[0][0] += 0;
+                rabbit_pos[0][1] -= 1;
                 break;
             case EAST:
+                rabbit_pos[0][0] -= 1;
+                rabbit_pos[0][1] += 0;
                 break;
             case WEST:
+                rabbit_pos[0][0] += 1;
+                rabbit_pos[0][1] += 0;
                 break;
         }
     } else if (i >= max_curr) {
@@ -260,10 +265,13 @@ function animateRabbit(i) {
                 pos_body[2] += cur_anim == FORWARD?2*inc_pos_x:inc_pos_x;
                 break;
             case SOUTH:
+                pos_body[2] -= cur_anim == FORWARD?2*inc_pos_x:inc_pos_x;
                 break;
             case EAST:
+                pos_body[0] -= cur_anim == FORWARD?2*inc_pos_x:inc_pos_x;
                 break;
             case WEST:
+                pos_body[0] += cur_anim == FORWARD?2*inc_pos_x:inc_pos_x;
                 break;
         }
         if (i<max_curr/2)
@@ -271,4 +279,121 @@ function animateRabbit(i) {
         else
             pos_body[1] -= cur_anim == FORWARD?2*inc_pos_y:inc_pos_y;
     }
+}
+
+function animateRotationLeft(i) {
+    if (i==0) {
+        switch (rabbit_facing_direction) {
+            case NORTH:
+                rabbit_facing_direction = WEST;
+                break;
+            case SOUTH:
+                rabbit_facing_direction = EAST;
+                break;
+            case EAST:
+                rabbit_facing_direction = NORTH;
+                break;
+            case WEST:
+                rabbit_facing_direction = SOUTH;
+                break;
+        }
+    } else if (i>= max_curr) {
+        facing_angle = fix_round_error(facing_angle, 90);
+    } else {
+        facing_angle += cur_anim == FORWARD?2*inc_facing_angle:inc_facing_angle;
+    }
+}
+
+function animateRotationRight(i) {
+    if (i==0) {
+        switch (rabbit_facing_direction) {
+            case NORTH:
+                rabbit_facing_direction = EAST;
+                break;
+            case SOUTH:
+                rabbit_facing_direction = WEST;
+                break;
+            case EAST:
+                rabbit_facing_direction = SOUTH;
+                break;
+            case WEST:
+                rabbit_facing_direction = NORTH;
+                break;
+        }
+    } else if (i>= max_curr) {
+        facing_angle = fix_round_error(facing_angle, 90);
+    } else {
+        facing_angle -= cur_anim == FORWARD?2*inc_facing_angle:inc_facing_angle;
+    }
+}
+
+function rabbit_future_position() {
+    var ahead_position = [-1, -1];
+    switch (rabbit_facing_direction) {
+        case NORTH:
+            ahead_position[0] = rabbit_pos[0][0] + 0;
+            ahead_position[1] = rabbit_pos[0][1] + 1;
+            break;
+        case SOUTH:
+            ahead_position[0] = rabbit_pos[0][0] + 0;
+            ahead_position[1] = rabbit_pos[0][1] - 1;
+            break;
+        case EAST:
+            ahead_position[0] = rabbit_pos[0][0] - 1;
+            ahead_position[1] = rabbit_pos[0][1] + 0;
+            break;
+        case WEST:
+            ahead_position[0] = rabbit_pos[0][0] + 1;
+            ahead_position[1] = rabbit_pos[0][1] + 0;
+            break;
+        default:
+            throw "animateRabbit(): something wrong";
+    }
+    return ahead_position;
+}
+
+var curr_animation = null;
+
+function animateRabbit(i) {
+    if (rabbit_eated)
+        return;
+    if (i==0) {
+        var val = Math.round(Math.random()*10000) % 100;
+        var ahead_position = rabbit_future_position();
+        if (    ahead_position[0]>=env_size_w   || 
+                ahead_position[0]<0             ||
+                ahead_position[1]>=env_size_h   || 
+                ahead_position[1]<0             ||
+                environment[ahead_position[0]][ahead_position[1]].element != VOID) {
+            curr_animation = val<50?RABBIT_LEFT:RABBIT_RIGHT;
+        } else if (curr_animation == RABBIT_LEFT || curr_animation == RABBIT_RIGHT) {
+            curr_animation = RABBIT_FORWARD;
+        } else if (val<50) {
+            curr_animation = RABBIT_FORWARD;
+        } else if (val<75) {
+            curr_animation = RABBIT_RIGHT;
+        } else {
+            curr_animation = RABBIT_LEFT;
+        }
+    }
+    switch (curr_animation) {
+        case RABBIT_FORWARD:
+            animateForward(i);
+            break;
+        case RABBIT_RIGHT:
+            animateRotationRight(i);
+            break;
+        case RABBIT_LEFT:
+            animateRotationLeft(i);
+            break;
+    }
+}
+
+function reinitializeRabbit() {
+    rabbit_pos = [generateFood(env_size_w, env_size_h, environment, true)];
+    facing_angle = 0;
+    pos_body[0] = tile_size_min/2 + rabbit_pos[0][0] * tile_size_max;
+    pos_body[1] = 0.08;
+    pos_body[2] = tile_size_min/2 + rabbit_pos[0][1] * tile_size_max;
+    rabbit_facing_direction = NORTH;
 }

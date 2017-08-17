@@ -1,6 +1,9 @@
 "use strict";
 
-var gl; 
+var gl;
+var environment;
+var env_size_w = 16;
+var env_size_h = 16;
 
 var square_size = 1.0;
 var tile_size_max = 0.25;
@@ -44,6 +47,10 @@ var FURTHER_ROTATION_LEFT   = 57;
 var FURTHER_ROTATION_RIGHT  = 58;
 var FURTHER_ROTATION2_LEFT  = 59;
 var FURTHER_ROTATION2_RIGHT = 60;
+
+var RABBIT_FORWARD = 0;
+var RABBIT_LEFT = 1;
+var RABBIT_RIGHT = 2;
 
 // facing directions
 var NORTH = 20;
@@ -121,3 +128,5 @@ rabbit_ear_dim.x = scale*0.15; rabbit_ear_dim.y = scale*0.35; rabbit_ear_dim.z =
 
 var rabbit_nose_dim = {};
 rabbit_nose_dim.x = scale*0.05; rabbit_nose_dim.y = scale*0.05; rabbit_nose_dim.z = scale*0.05; 
+
+var rabbit_eated = false;

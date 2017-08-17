@@ -4,12 +4,9 @@ var stats;
 
 var points = 0;
 
-var env_size_w = 16;
-var env_size_h = 16;
 var poss;
 var food; var theta_food = 0;
 
-var environment;
 var snake_head;
 var snakeList = new List();
 var facing_direction = NORTH;
@@ -29,6 +26,8 @@ var uColor;
 var uModelViewMatrix; var uProjectionMatrix; var uCameraMatrix;
 var uDiffuseProduct; var uSpecularProduct; var uShininess;
 var uText0;
+
+var pause = true;
 
 function setCamera(eye, at, update_global) {
     // eye.delta_transl; eye.delta_angle;
@@ -77,7 +76,7 @@ function renderEnv() {
             if (food[0][0] == i && food[0][1] == j) {
                 gl.uniform4fv( uColor, GREEN);
                 //renderTile(mult(translate(tile_size_min/2 + tile_size_max*i , 0.0, tile_size_min/2 + tile_size_max*j), scalematrix));
-            } else if (rabbit_pos[0][0] == i && rabbit_pos[0][1] == j) {
+            } else if (!rabbit_eated && rabbit_pos[0][0] == i && rabbit_pos[0][1] == j) {
                 gl.uniform4fv( uColor, WHITE);
             } else {
                 gl.uniform4fv( uColor, environment[i][j].color);
@@ -240,6 +239,12 @@ function bindButtons() {
             rightKeyPressed = true;
         } else if(event.keyCode == 38) {
             upKeyPressed = true;
+        } else if (event.keyCode == 80) {
+            pause = !pause;
+            if (pause) 
+                document.getElementById("points").innerHTML = "PAUSED";
+            else
+                updatePoints(points);
         }
     });
 
@@ -250,6 +255,12 @@ window.onload = function init() {
     canvas.width = window.innerWidth-35;
     canvas.height = window.innerHeight-250;
     canvas.style.display = "block";
+
+    var instructions = document.getElementById( "instructions" );
+    instructions.style.position = "absolute";
+    instructions.style.top = canvas.height + 10;
+    instructions.style.left = "50px";
+    instructions.style.color = "white";
 
     // stats = new Stats();
     // stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
@@ -427,7 +438,15 @@ function animation(type, curr) {
                     updatePoints(points);
                     snakeList.copySecond();
                     snakeList.head.next.next.data.copyied = true;
-                    food = [generateFood(env_size_w, env_size_h, environment)];
+                    food = [generateFood(env_size_w, env_size_h, environment, false)];
+                }
+                if (checkRabbit()) {
+                    points += 5;
+                    updatePoints(points);
+                    snakeList.copySecond();
+                    snakeList.head.next.next.data.copyied = true;
+                    rabbit_pos = null;
+                    rabbit_eated = true;
                 }
 
                 inc_rot = linear_interpolation(speed, 0, max_curr, 0, 90);
@@ -555,9 +574,16 @@ function animation(type, curr) {
                     updatePoints(points);
                     snakeList.copySecond();
                     snakeList.head.next.next.data.copyied = true;
-                    food = [generateFood(env_size_w, env_size_h, environment)];
+                    food = [generateFood(env_size_w, env_size_h, environment, false)];
                 }
-
+                if (checkRabbit()) {
+                    points += 5;
+                    updatePoints(points);
+                    snakeList.copySecond();
+                    snakeList.head.next.next.data.copyied = true;
+                    rabbit_pos = null;
+                    rabbit_eated = true;
+                }
                 inc_rot = -linear_interpolation(speed, 0, max_curr, 0, 90);
                 tot_tran.x=0; tot_tran.y=0; tot_rot=0;
 
@@ -677,7 +703,15 @@ function animation(type, curr) {
                         updatePoints(points);
                         snakeList.copySecond();
                         snakeList.head.next.next.data.copyied = true;
-                        food = [generateFood(env_size_w, env_size_h, environment)];
+                        food = [generateFood(env_size_w, env_size_h, environment, false)];
+                    }
+                    if (checkRabbit()) {
+                        points += 5;
+                        updatePoints(points);
+                        snakeList.copySecond();
+                        snakeList.head.next.next.data.copyied = true;
+                        rabbit_pos = null;
+                        rabbit_eated = true;
                     }
 
                     tot_tran.x=0; tot_tran.y=0;
@@ -718,6 +752,7 @@ function animation(type, curr) {
                     renderEnvObjects(poss, [food, theta_food]);
                     
                     updateSnakeEnv(environment, snakeList.head);
+
                     anim_counter=0; anim=false; cur_anim = null;
                     // window.requestAnimationFrame(render);
                 } else {
@@ -769,52 +804,75 @@ function checkFood() {
     return false;
 }
 
+function checkRabbit() {
+    if (!rabbit_eated && snake_head.future_position[0] == rabbit_pos[0][0] && snake_head.future_position[1] == rabbit_pos[0][1])
+        return true;
+    return false;
+}
+
 var anim = false; var cur_anim = null; var anim_counter = 0;
 function render() {
 
-    if (anim==false) {
-
-        if (leftKeyPressed) {
-            anim = true;
-            anim_counter = 0;
-            leftKeyPressed = false;
-            cur_anim = ROTATION_LEFT;
-            animation(ROTATION_LEFT, anim_counter);
-            animateRabbit(anim_counter);
-        } else if (rightKeyPressed) {
-            anim = true;
-            anim_counter = 0;
-            rightKeyPressed = false;
-            cur_anim = ROTATION_RIGHT;
-            animation(ROTATION_RIGHT, anim_counter);
-            animateRabbit(anim_counter);
-        } else if (upKeyPressed) {
-            anim = true;
-            anim_counter = 0;
-            upKeyPressed = false;
-            cur_anim = FORWARD;
-            animation(FORWARD, anim_counter);
-            animateRabbit(anim_counter);
-        } else {
-            gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-            renderEnv();
-            theta_food = (theta_food + 1) % 360;
-            renderEnvObjects(poss, [food, theta_food]);
-            // anim = true;
-            // anim_counter = 0;
-            // upKeyPressed = false;
-            // cur_anim = FORWARD;
-            // animation(FORWARD, anim_counter);
-        }
+    if (pause) {
+        gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        renderEnv();
+        theta_food = (theta_food + 1) % 360;
+        renderEnvObjects(poss, [food, theta_food]);
     } else {
-        if (cur_anim == FORWARD)
-            anim_counter+=2*speed;
-        else
-            anim_counter+=speed;
-        animateRabbit(anim_counter);
-        animation(cur_anim, anim_counter);
+        if (anim==false) {
+            if (rabbit_eated) {
+                reinitializeRabbit();
+                rabbit_eated = false;
+            }
+            if (leftKeyPressed) {
+                anim = true;
+                anim_counter = 0;
+                leftKeyPressed = false;
+                cur_anim = ROTATION_LEFT;
+                if (!rabbit_eated)
+                    animateRabbit(anim_counter);
+                animation(ROTATION_LEFT, anim_counter);
+            } else if (rightKeyPressed) {
+                anim = true;
+                anim_counter = 0;
+                rightKeyPressed = false;
+                cur_anim = ROTATION_RIGHT;
+                if (!rabbit_eated)
+                    animateRabbit(anim_counter);
+                animation(ROTATION_RIGHT, anim_counter);
+            } else if (upKeyPressed) {
+                anim = true;
+                anim_counter = 0;
+                upKeyPressed = false;
+                cur_anim = FORWARD;
+                if (!rabbit_eated)
+                    animateRabbit(anim_counter);
+                animation(FORWARD, anim_counter);
+            } else {
+                // gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+                // renderEnv();
+                // theta_food = (theta_food + 1) % 360;
+                // renderEnvObjects(poss, [food, theta_food]);
+                anim = true;
+                anim_counter = 0;
+                upKeyPressed = false;
+                cur_anim = FORWARD;
+                if (!rabbit_eated)
+                    animateRabbit(anim_counter);
+                animation(FORWARD, anim_counter);
+            }
+        } else {
+            if (cur_anim == FORWARD)
+                anim_counter+=2*speed;
+            else
+                anim_counter+=speed;
+            if (!rabbit_eated)
+                animateRabbit(anim_counter);
+            animation(cur_anim, anim_counter);
+        }
     }
-    renderObject(RABBIT, rabbit_pos);
+    if (!rabbit_eated)
+        renderObject(RABBIT, [[]]);
     setTimeout(function() {
         window.requestAnimationFrame(render);
     }, 1000 / 50);
