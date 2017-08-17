@@ -242,7 +242,7 @@ function bindButtons() {
         } else if (event.keyCode == 80) {
             pause = !pause;
             if (pause) 
-                document.getElementById("points").innerHTML = "PAUSED";
+                document.getElementById("points").innerHTML += " PAUSED";
             else
                 updatePoints(points);
         }
@@ -866,7 +866,7 @@ function render() {
                 anim_counter+=2*speed;
             else
                 anim_counter+=speed;
-            if (!rabbit_eated)
+            // if (!rabbit_eated)
                 animateRabbit(anim_counter);
             animation(cur_anim, anim_counter);
         }

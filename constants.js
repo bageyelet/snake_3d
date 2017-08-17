@@ -9,7 +9,7 @@ var square_size = 1.0;
 var tile_size_max = 0.25;
 var tile_size_min = 0.25;
 
-var max_curr=200; var speed=10;
+var max_curr=150; var speed=10;
 
 // colors
 var RED         = vec4( 1.0, 0.0, 0.0, 1.0 );
