@@ -445,7 +445,7 @@ function animation(type, curr) {
                     updatePoints(points);
                     snakeList.copySecond();
                     snakeList.head.next.next.data.copyied = true;
-                    rabbit_pos = null;
+                    // rabbit_pos = null;
                     rabbit_eated = true;
                 }
 
@@ -581,7 +581,7 @@ function animation(type, curr) {
                     updatePoints(points);
                     snakeList.copySecond();
                     snakeList.head.next.next.data.copyied = true;
-                    rabbit_pos = null;
+                    // rabbit_pos = null;
                     rabbit_eated = true;
                 }
                 inc_rot = -linear_interpolation(speed, 0, max_curr, 0, 90);
@@ -710,7 +710,7 @@ function animation(type, curr) {
                         updatePoints(points);
                         snakeList.copySecond();
                         snakeList.head.next.next.data.copyied = true;
-                        rabbit_pos = null;
+                        // rabbit_pos = null;
                         rabbit_eated = true;
                     }
 
@@ -829,7 +829,7 @@ function render() {
                 anim_counter = 0;
                 leftKeyPressed = false;
                 cur_anim = ROTATION_LEFT;
-                if (!rabbit_eated)
+                // if (!rabbit_eated)
                     animateRabbit(anim_counter);
                 animation(ROTATION_LEFT, anim_counter);
             } else if (rightKeyPressed) {
@@ -837,7 +837,7 @@ function render() {
                 anim_counter = 0;
                 rightKeyPressed = false;
                 cur_anim = ROTATION_RIGHT;
-                if (!rabbit_eated)
+                // if (!rabbit_eated)
                     animateRabbit(anim_counter);
                 animation(ROTATION_RIGHT, anim_counter);
             } else if (upKeyPressed) {
@@ -845,7 +845,7 @@ function render() {
                 anim_counter = 0;
                 upKeyPressed = false;
                 cur_anim = FORWARD;
-                if (!rabbit_eated)
+                // if (!rabbit_eated)
                     animateRabbit(anim_counter);
                 animation(FORWARD, anim_counter);
             } else {
@@ -857,7 +857,7 @@ function render() {
                 anim_counter = 0;
                 upKeyPressed = false;
                 cur_anim = FORWARD;
-                if (!rabbit_eated)
+                // if (!rabbit_eated)
                     animateRabbit(anim_counter);
                 animation(FORWARD, anim_counter);
             }
@@ -871,7 +871,7 @@ function render() {
             animation(cur_anim, anim_counter);
         }
     }
-    if (!rabbit_eated)
+    // if (!rabbit_eated)
         renderObject(RABBIT, [[]]);
     setTimeout(function() {
         window.requestAnimationFrame(render);

@@ -355,8 +355,8 @@ function rabbit_future_position() {
 var curr_animation = null;
 
 function animateRabbit(i) {
-    if (rabbit_eated)
-        return;
+    // if (rabbit_eated)
+    //     return;
     if (i==0) {
         var val = Math.round(Math.random()*10000) % 100;
         var ahead_position = rabbit_future_position();
