@@ -3,6 +3,7 @@ var canvas; var program;
 var stats;
 
 var points = 0;
+var difficulty_level = 3;
 
 var poss;
 var food; var theta_food = 0;
@@ -248,6 +249,26 @@ function bindButtons() {
         }
     });
 
+    // document.getElementById("inc_diff").onclick = function() {
+    //     pause = true;
+    //     max_curr = max_curr<= 50 ? max_curr : max_curr - 50;
+    //     initializePositionUpdater();
+    //     initializeRabbitIncs();
+    //     difficulty_level += 1;
+    //     var difficulty = document.getElementById( "difficulty" );
+    //     difficulty.innerHTML = "CURRENT DIFFICULTY: " + difficulty_level;
+    //     pause = false;
+    // };
+    // document.getElementById("dec_diff").onclick = function() {
+    //     pause = true;
+    //     max_curr = max_curr>=300 ? max_curr : max_curr + 50;
+    //     initializePositionUpdater();
+    //     initializeRabbitIncs();
+    //     difficulty_level -= 1;
+    //     var difficulty = document.getElementById( "difficulty" );
+    //     difficulty.innerHTML = "CURRENT DIFFICULTY: " + difficulty_level;
+    //     pause = false;
+    // };
 }
 
 window.onload = function init() {
@@ -259,8 +280,14 @@ window.onload = function init() {
     var instructions = document.getElementById( "instructions" );
     instructions.style.position = "absolute";
     instructions.style.top = canvas.height + 10;
-    instructions.style.left = "50px";
+    instructions.style.left = canvas.width/2;
     instructions.style.color = "white";
+
+    // var difficulty = document.getElementById( "difficulty" );
+    // difficulty.style.position = "absolute";
+    // difficulty.style.top = canvas.height + 10;
+    // difficulty.style.left = canvas.width/2;
+    // difficulty.style.color = "white";
 
     // stats = new Stats();
     // stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom

@@ -189,24 +189,32 @@ function renderRabbit() {
     traverse(RABBIT_BODY);
 }
 
-var inc_pos_x = linear_interpolation(speed, 0, max_curr, 0, tile_size_max);
-var inc_pos_y = linear_interpolation(speed, 0, 2*max_curr, 0, tile_size_max);
+var inc_pos_x; var inc_pos_y; var inc_body_1;
+var inc_feet_1; var inc_arm_1; var inc_head_1;
+var inc_body_2; var inc_feet_2; var inc_arm_2; var inc_head_2;
+var inc_body_3; var inc_feet_3; var inc_arm_3;
+var inc_facing_angle;
 
-var inc_body_1 = linear_interpolation(speed, 0, max_curr/3, -20, -5);
-var inc_feet_1 = linear_interpolation(speed, 0, max_curr/3, 20, 5);
-var inc_arm_1  = linear_interpolation(speed, 0, max_curr/3, 20, -40);
-var inc_head_1 = linear_interpolation(speed, 0, max_curr/3, 20, 5);
+function initializeRabbitIncs() {
+    inc_pos_x = linear_interpolation(speed, 0, max_curr, 0, tile_size_max);
+    inc_pos_y = linear_interpolation(speed, 0, 2*max_curr, 0, tile_size_max);
 
-var inc_body_2 = linear_interpolation(speed, 0, max_curr/3, -5, -40);
-var inc_feet_2 = linear_interpolation(speed, 0, max_curr/3, 5, 60);
-var inc_arm_2  = linear_interpolation(speed, 0, max_curr/3, -40, 40);
-var inc_head_2 = linear_interpolation(speed, 0, max_curr/3, 5, 20);
+    inc_body_1 = linear_interpolation(speed, 0, max_curr/3, -20, -5);
+    inc_feet_1 = linear_interpolation(speed, 0, max_curr/3, 20, 5);
+    inc_arm_1  = linear_interpolation(speed, 0, max_curr/3, 20, -40);
+    inc_head_1 = linear_interpolation(speed, 0, max_curr/3, 20, 5);
 
-var inc_body_3 = linear_interpolation(speed, 0, max_curr/3, -40, -20);
-var inc_feet_3 = linear_interpolation(speed, 0, max_curr/3, 60, 20);
-var inc_arm_3  = linear_interpolation(speed, 0, max_curr/3, 40, 20);
+    inc_body_2 = linear_interpolation(speed, 0, max_curr/3, -5, -40);
+    inc_feet_2 = linear_interpolation(speed, 0, max_curr/3, 5, 60);
+    inc_arm_2  = linear_interpolation(speed, 0, max_curr/3, -40, 40);
+    inc_head_2 = linear_interpolation(speed, 0, max_curr/3, 5, 20);
 
-var inc_facing_angle = linear_interpolation(speed, 0, max_curr, 0, 90);
+    inc_body_3 = linear_interpolation(speed, 0, max_curr/3, -40, -20);
+    inc_feet_3 = linear_interpolation(speed, 0, max_curr/3, 60, 20);
+    inc_arm_3  = linear_interpolation(speed, 0, max_curr/3, 40, 20);
+
+    inc_facing_angle = linear_interpolation(speed, 0, max_curr, 0, 90);
+} initializeRabbitIncs();
 
 function animateForward(i) {
     if (i==0) {

@@ -83,6 +83,8 @@ function initializePositionUpdater() {
     gFurRot = genFurtherRotation();
     gFur2Rot = genFurtherRotation2();
 
+    forwardRotationArray = []; forwardArray = []; straigthenArray = []; furtherRotationArray = []; furtherRotation2Array = [];
+
     for (var i=0; i<max_curr + speed + 1; i+=speed) {
         forwardRotationArray[i] = gForRot.next().value;
         forwardArray[i] = gFor.next().value;
